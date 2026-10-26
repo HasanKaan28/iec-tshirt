@@ -7,7 +7,7 @@
 <meta name="description" content="Choose where your logo goes on the IEC Engineering Club shirt. Turn the 3D shirt, pick sponsor spots and send the club your request.">
 <meta property="og:title" content="IEC Shirt Sponsorship">
 <meta property="og:description" content="Turn the 3D IEC Engineering Club shirt and pick the spot for your logo.">
-<meta property="og:image" content="https://hasankaan28.github.io/iec-tshirt/mock/B2.jpg">
+<meta property="og:image" content="https://hasankaan28.github.io/iec-tshirt/mock/G.jpg">
 <meta property="og:type" content="website">
 <title>IEC Shirt Sponsorship</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -225,7 +225,7 @@ const T = {
   en: {
     city: 'Sarajevo', stageTitle: 'The IEC shirt in 3D',
     title: 'Put your logo on the IEC shirt',
-    lede: 'IEC Engineering Club members wear this shirt. Most buy it from the club, and the most active members win it by collecting 10 stamps at club events. Choose the shirt and the spots you want, then send us the request below.',
+    lede: 'IEC Engineering Club members wear this shirt. Most buy it from the club, and the most active members win it by collecting 10 stamps at club events. Choose the spots you want, then send us the request below.',
     spotsTitle: 'Sponsor spots', count: n => `Selected: ${n}`, available: 'Available', taken: 'Taken',
     design: 'Shirt', designs: { B: 'White', G: 'Black' },
     front: 'Front', back: 'Back', spin: 'Rotate', drag: 'Drag to turn the shirt. Tap a spot to choose it.',
@@ -246,7 +246,7 @@ const T = {
   tr: {
     city: 'Saraybosna', stageTitle: 'IEC tişörtü 3D',
     title: 'Logonuzu IEC tişörtüne koyun',
-    lede: 'Bu tişörtü IEC Engineering Club üyeleri giyer. Üyelerin çoğu onu kulüpten satın alır, en aktif üyeler ise kulüp etkinliklerinde 10 damga toplayarak kazanır. Tişörtü ve istediğiniz alanları seçin, sonra aşağıdan talebinizi bize gönderin.',
+    lede: 'Bu tişörtü IEC Engineering Club üyeleri giyer. Üyelerin çoğu onu kulüpten satın alır, en aktif üyeler ise kulüp etkinliklerinde 10 damga toplayarak kazanır. İstediğiniz alanları seçin, sonra aşağıdan talebinizi bize gönderin.',
     spotsTitle: 'Sponsor alanları', count: n => `Seçilen: ${n}`, available: 'Boş', taken: 'Dolu',
     design: 'Tişört', designs: { B: 'Beyaz', G: 'Siyah' },
     front: 'Ön', back: 'Arka', spin: 'Döndür', drag: 'Tişörtü çevirmek için sürükleyin. Seçmek için bir alana dokunun.',
@@ -267,7 +267,7 @@ const T = {
   bs: {
     city: 'Sarajevo', stageTitle: 'IEC majica u 3D',
     title: 'Stavite svoj logo na IEC majicu',
-    lede: 'Ovu majicu nose članovi IEC Engineering Cluba. Većina članova je kupi od kluba, a najaktivniji je osvoje skupljanjem 10 pečata na događajima kluba. Odaberite majicu i mjesta koja želite, a zatim nam pošaljite zahtjev ispod.',
+    lede: 'Ovu majicu nose članovi IEC Engineering Cluba. Većina članova je kupi od kluba, a najaktivniji je osvoje skupljanjem 10 pečata na događajima kluba. Odaberite mjesta koja želite, a zatim nam pošaljite zahtjev ispod.',
     spotsTitle: 'Sponzorska mjesta', count: n => `Odabrano: ${n}`, available: 'Slobodno', taken: 'Zauzeto',
     design: 'Majica', designs: { B: 'Bijela', G: 'Crna' },
     front: 'Naprijed', back: 'Leđa', spin: 'Okreći', drag: 'Povucite da okrenete majicu. Dodirnite mjesto da ga odaberete.',
@@ -346,12 +346,13 @@ const DESIGNS = {
   B: { front: ['art/B_front_seal.png', 0.6, 3.0, 6.0, 5.9], back: ['art/B_back.png', -5.75, 6.1, 11.5, 9.5], nape: ['art/NAPE_B.png', -1.53, 2.45, 3.06, 1.2], fabric: '#f7f7f5', rib: 0xe9ecf0, inner: 0xd9dee5, sheen: '#ffffff', exposure: 0.86, mock: 'mock/B2.jpg' },
   G: { front: ['art/G_front.png', 1.7, 4.1, 3.8, 3.8], back: ['art/G_back.png', -6.0, 5.8, 12, 10], nape: ['art/NAPE_G.png', -1.53, 2.45, 3.06, 1.2], fabric: '#161616', rib: 0x1c1c1c, inner: 0x0f0f0f, sheen: '#5e5e5e', exposure: 1.0, mock: 'mock/G.jpg', dark: true },
 };
-const ORDER = ['B', 'G'];
+// The shirts sponsors are shown. Since 2026-10-26 the club makes only the black shirt; B stays defined for reference.
+const ORDER = ['G'];
 
 // ---------- state
-const state = { lang: 'en', design: 'B', selected: new Set(), hover: null };
+const state = { lang: 'en', design: ORDER[0], selected: new Set(), hover: null };
 const askedShirt = (new URLSearchParams(location.search).get('shirt') || '').toUpperCase();
-if (DESIGNS[askedShirt]) state.design = askedShirt;
+if (ORDER.includes(askedShirt)) state.design = askedShirt;
 try {
   const saved = localStorage.getItem('iec-sponsor-lang');
   state.lang = T[saved] ? saved : (/^tr/i.test(navigator.language) ? 'tr' : /^(bs|hr|sr)/i.test(navigator.language) ? 'bs' : 'en');
@@ -383,6 +384,7 @@ function renderDesigns() {
     b.addEventListener('click', () => setDesign(k));
     box.appendChild(b);
   }
+  box.parentElement.hidden = ORDER.length < 2; // one shirt: nothing to choose
 }
 function renderSpots() {
   const ul = $('spots'); ul.textContent = '';
