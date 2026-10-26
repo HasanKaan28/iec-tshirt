@@ -661,6 +661,13 @@ function buildSleeve(sgn, back) {
     for (let j = 0; j <= NF; j++) {
       const g = j / NF, phi = Math.PI * g;   // 0 at the top seam, PI at the underarm seam
       const p = c.clone().addScaledVector(e1, A * Math.cos(phi)).addScaledVector(Z, (back ? -B : B) * Math.sin(phi));
+      // the sleeve grows out of the body: its root sits just inside the torso surface, so no gap opens at the armhole
+      const k = smooth(0, 0.32, t);
+      if (k < 1) {
+        const r = ring(Math.max(0, Y0 - p.y)), zr = Math.min(1, Math.abs(p.z) / r.b);
+        const xs = Math.max(0, r.a * Math.pow(Math.max(0, 1 - Math.pow(zr, SUPER)), 1 / SUPER) - 0.3);
+        p.x = sgn * xs + (p.x - sgn * xs) * k;
+      }
       const px = ps * (top[0] + (bot[0] - top[0]) * g), py = top[1] + (bot[1] - top[1]) * g;
       part.pos.push(p.x, p.y, p.z); part.out.push(p.x - c.x, p.y - c.y, p.z - c.z);
       part.uv.push(...uvOf(px, py)); part.flat.push(px, py, t, g);
