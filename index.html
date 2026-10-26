@@ -340,10 +340,11 @@ const SPOTS = [
 ];
 // The two shirts sponsors choose from. B: white, club seal on the left chest, big IEC monogram on the back.
 // G: black, white seal on the left chest, IEC drawn as a 3D technical drawing on the back.
+// Both carry the IUS crest and the letters IUS under the collar (nape).
 // Each print is [image, x, y, width, height] in inches; back prints are placed as seen from behind.
 const DESIGNS = {
-  B: { front: ['art/B_front_seal.png', 0.6, 3.0, 6.0, 5.9], back: ['art/B_back.png', -5.75, 6.1, 11.5, 9.5], fabric: '#f7f7f5', rib: 0xe9ecf0, inner: 0xd9dee5, sheen: '#ffffff', exposure: 0.86, mock: 'mock/B2.jpg' },
-  G: { front: ['art/G_front.png', 1.7, 4.1, 3.8, 3.8], back: ['art/G_back.png', -6.0, 5.8, 12, 10], fabric: '#161616', rib: 0x1c1c1c, inner: 0x0f0f0f, sheen: '#5e5e5e', exposure: 1.0, mock: 'mock/G.jpg', dark: true },
+  B: { front: ['art/B_front_seal.png', 0.6, 3.0, 6.0, 5.9], back: ['art/B_back.png', -5.75, 6.1, 11.5, 9.5], nape: ['art/NAPE_B.png', -1.53, 2.45, 3.06, 1.2], fabric: '#f7f7f5', rib: 0xe9ecf0, inner: 0xd9dee5, sheen: '#ffffff', exposure: 0.86, mock: 'mock/B2.jpg' },
+  G: { front: ['art/G_front.png', 1.7, 4.1, 3.8, 3.8], back: ['art/G_back.png', -6.0, 5.8, 12, 10], nape: ['art/NAPE_G.png', -1.53, 2.45, 3.06, 1.2], fabric: '#161616', rib: 0x1c1c1c, inner: 0x0f0f0f, sheen: '#5e5e5e', exposure: 1.0, mock: 'mock/G.jpg', dark: true },
 };
 const ORDER = ['B', 'G'];
 
@@ -456,7 +457,8 @@ function loadImage(src) {
 }
 const logoSrc = (k, id) => SPONSOR_LOGOS[id][DESIGNS[k].dark ? 1 : 0];
 function ensureDesign(k) {
-  return Promise.all([loadImage(DESIGNS[k].front[0]), loadImage(DESIGNS[k].back[0]), ...Object.keys(SPONSOR_LOGOS).map(id => loadImage(logoSrc(k, id)))]);
+  const d = DESIGNS[k];
+  return Promise.all([loadImage(d.front[0]), loadImage(d.back[0]), loadImage(d.nape[0]), ...Object.keys(SPONSOR_LOGOS).map(id => loadImage(logoSrc(k, id)))]);
 }
 const mats = { outer: [], inner: [], rib: [] };
 function setDesign(k) {
@@ -550,6 +552,7 @@ function paint(side) {
   g.imageSmoothingQuality = 'high';
   const [src, x, y, w, h] = d[side];
   if (images[src]) g.drawImage(images[src], x, y, w, h);
+  if (side === 'back' && images[d.nape[0]]) g.drawImage(images[d.nape[0]], ...d.nape.slice(1));
   stitches(g, side, d);
   for (const s of SPOTS) if (s.side === side) drawSpot(g, s);
   if (textures[side]) textures[side].needsUpdate = true;

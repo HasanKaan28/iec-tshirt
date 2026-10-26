@@ -32,7 +32,7 @@ Doğrudan bir tişörte link vermek için: `?shirt=G` (siyah) ya da `?shirt=B` (
 | Sol kol | 7.5 × 7.5 cm |
 | Sağ kol | 7.5 × 7.5 cm |
 
-Sırtın üstünde, yakanın altında sponsor yoktur. Satılan tişörtlerde orası boştur. Ödül olarak verilen 10 tişörtte orada küçük, yuvarlak bir IEC PASS damgası vardır.
+Sırtın üstünde, yakanın altında sponsor yoktur. Orada her tişörtte IUS arması ve IUS yazısı vardır: beyaz tişörtte yazı turuncu, siyah tişörtte beyazdır. Ödül olarak verilen 10 tişörtte bunun yanında küçük, yuvarlak bir IEC PASS damgası da vardır.
 
 Sağ göğüs Alma Ras'ındır: sayfada orada Alma Ras logosu görünür ve alan "Dolu" olarak gösterilir.
 
