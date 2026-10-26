@@ -178,7 +178,6 @@ form { display: flex; flex-direction: column; gap: 12px; }
     <div class="section">
       <div class="section-head"><h2 data-t="spotsTitle"></h2><span class="count" id="count" aria-live="polite"></span></div>
       <ul class="spots" id="spots"></ul>
-      <p class="fine" data-t="nameNote"></p>
     </div>
 
     <div class="section">
@@ -226,9 +225,8 @@ const T = {
   en: {
     city: 'Sarajevo', stageTitle: 'The IEC shirt in 3D',
     title: 'Put your logo on the IEC shirt',
-    lede: 'Members of IEC Engineering Club earn this shirt by collecting 10 stamps at club events, so the people wearing it are the club\'s most active engineering students. Choose the shirt and the spots you want, then send us the request below.',
+    lede: 'IEC Engineering Club members wear this shirt. Most buy it from the club, and the most active members win it by collecting 10 stamps at club events. Choose the shirt and the spots you want, then send us the request below.',
     spotsTitle: 'Sponsor spots', count: n => `Selected: ${n}`, available: 'Available', taken: 'Taken',
-    nameNote: 'The upper back, under the collar, carries the name of the member who wears the shirt.', nameSample: 'NAME SURNAME',
     design: 'Shirt', designs: { B: 'White', G: 'Black' },
     front: 'Front', back: 'Back', spin: 'Rotate', drag: 'Drag to turn the shirt. Tap a spot to choose it.',
     formTitle: 'Your request', company: 'Company', contact: 'Contact (email or phone)', note: 'Note (optional)', prepare: 'Prepare request',
@@ -248,9 +246,8 @@ const T = {
   tr: {
     city: 'Saraybosna', stageTitle: 'IEC tişörtü 3D',
     title: 'Logonuzu IEC tişörtüne koyun',
-    lede: 'IEC Engineering Club üyeleri bu tişörtü kulüp etkinliklerinde 10 damga toplayarak kazanır. Yani onu kulübün en aktif mühendislik öğrencileri giyer. Tişörtü ve istediğiniz alanları seçin, sonra aşağıdan talebinizi bize gönderin.',
+    lede: 'Bu tişörtü IEC Engineering Club üyeleri giyer. Üyelerin çoğu onu kulüpten satın alır, en aktif üyeler ise kulüp etkinliklerinde 10 damga toplayarak kazanır. Tişörtü ve istediğiniz alanları seçin, sonra aşağıdan talebinizi bize gönderin.',
     spotsTitle: 'Sponsor alanları', count: n => `Seçilen: ${n}`, available: 'Boş', taken: 'Dolu',
-    nameNote: 'Sırtın üstünde, yakanın altında tişörtü giyen üyenin adı yazar.', nameSample: 'AD SOYAD',
     design: 'Tişört', designs: { B: 'Beyaz', G: 'Siyah' },
     front: 'Ön', back: 'Arka', spin: 'Döndür', drag: 'Tişörtü çevirmek için sürükleyin. Seçmek için bir alana dokunun.',
     formTitle: 'Talebiniz', company: 'Firma', contact: 'İletişim (e-posta ya da telefon)', note: 'Not (isteğe bağlı)', prepare: 'Talebi hazırla',
@@ -270,9 +267,8 @@ const T = {
   bs: {
     city: 'Sarajevo', stageTitle: 'IEC majica u 3D',
     title: 'Stavite svoj logo na IEC majicu',
-    lede: 'Članovi IEC Engineering Cluba ovu majicu osvajaju skupljanjem 10 pečata na događajima kluba, pa je nose najaktivniji studenti inženjerstva u klubu. Odaberite majicu i mjesta koja želite, a zatim nam pošaljite zahtjev ispod.',
+    lede: 'Ovu majicu nose članovi IEC Engineering Cluba. Većina članova je kupi od kluba, a najaktivniji je osvoje skupljanjem 10 pečata na događajima kluba. Odaberite majicu i mjesta koja želite, a zatim nam pošaljite zahtjev ispod.',
     spotsTitle: 'Sponzorska mjesta', count: n => `Odabrano: ${n}`, available: 'Slobodno', taken: 'Zauzeto',
-    nameNote: 'Na gornjem dijelu leđa, ispod kragne, piše ime člana koji nosi majicu.', nameSample: 'IME PREZIME',
     design: 'Majica', designs: { B: 'Bijela', G: 'Crna' },
     front: 'Naprijed', back: 'Leđa', spin: 'Okreći', drag: 'Povucite da okrenete majicu. Dodirnite mjesto da ga odaberete.',
     formTitle: 'Vaš zahtjev', company: 'Firma', contact: 'Kontakt (e-mail ili telefon)', note: 'Napomena (nije obavezno)', prepare: 'Pripremi zahtjev',
@@ -529,20 +525,6 @@ function drawSpot(g, s) {
   g.fillText(sel ? '✓ ' + s.cm : s.cm, W / 2, top + fs * 0.72 + gap + ms * 0.72);
   g.restore();
 }
-// The wearer's name across the upper back, under the collar (a sample name in the page language).
-function drawName(g, d) {
-  g.save();
-  g.scale(1 / PPI, 1 / PPI);
-  const word = tx().nameSample, maxW = 8 * PPI;
-  let fs = 1.25 * PPI;
-  g.font = `700 ${fs}px "Space Grotesk"`; g.letterSpacing = `${fs * 0.12}px`;
-  const tw = g.measureText(word).width;
-  if (tw > maxW) { fs *= maxW / tw; g.font = `700 ${fs}px "Space Grotesk"`; g.letterSpacing = `${fs * 0.12}px`; }
-  g.fillStyle = d.dark ? '#ffffff' : '#0f2f52';
-  g.textAlign = 'center'; g.textBaseline = 'alphabetic';
-  g.fillText(word, fs * 0.06, 3.55 * PPI);
-  g.restore();
-}
 // Twin-needle hems at the bottom and the cuffs, and the seam under the collar.
 function stitchLine(g, pts, color) {
   g.save(); g.strokeStyle = color; g.lineWidth = 0.035; g.setLineDash([0.11, 0.06]); g.lineCap = 'round';
@@ -569,7 +551,6 @@ function paint(side) {
   const [src, x, y, w, h] = d[side];
   if (images[src]) g.drawImage(images[src], x, y, w, h);
   stitches(g, side, d);
-  if (side === 'back') drawName(g, d);
   for (const s of SPOTS) if (s.side === side) drawSpot(g, s);
   if (textures[side]) textures[side].needsUpdate = true;
 }

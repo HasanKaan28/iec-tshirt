@@ -6,7 +6,7 @@ IEC Engineering Club (Saraybosna) kulüp tişörtünün 3D sponsor sayfası.
 
 Sponsorlar tişörtü seçer, döndürür, logolarını koymak istedikleri alanları işaretler ve kulübe gönderecekleri hazır mesajı alır. Sayfa kendi başına bir şey göndermez: mesaj iusengclub@gmail.com adresine e-postayla gider.
 
-Bu tişört, IEC Pass kartında 10 damga toplayan üyelere verilir.
+Tişörtü kulüp üyeleri giyer. Çoğu kulüpten satın alınır; 10 tanesi IEC Pass kartında 10 damga toplayan üyelere ödül olarak verilir.
 
 ## Tişörtler
 
@@ -32,7 +32,7 @@ Doğrudan bir tişörte link vermek için: `?shirt=G` (siyah) ya da `?shirt=B` (
 | Sol kol | 7.5 × 7.5 cm |
 | Sağ kol | 7.5 × 7.5 cm |
 
-Sırtın üstünde, yakanın altında sponsor yoktur: oraya tişörtü giyen üyenin adı yazılır. Sayfa orada sayfanın dilinde örnek bir isim gösterir (AD SOYAD, NAME SURNAME, IME PREZIME).
+Sırtın üstünde, yakanın altında sponsor yoktur. Satılan tişörtlerde orası boştur. Ödül olarak verilen 10 tişörtte orada küçük, yuvarlak bir IEC PASS damgası vardır.
 
 Sağ göğüs Alma Ras'ındır: sayfada orada Alma Ras logosu görünür ve alan "Dolu" olarak gösterilir.
 
@@ -40,4 +40,4 @@ Sağ göğüs Alma Ras'ındır: sayfada orada Alma Ras logosu görünür ve alan
 
 ## English
 
-A 3D page for sponsors of the IEC Engineering Club shirt in Sarajevo. Sponsors pick the white shirt (B) or the black shirt (G), turn it, choose the spots for their logo and get a ready message to send to iusengclub@gmail.com. The flat pattern is wrapped around the body, so prints show at their real size. The right chest spot is taken by Alma Ras, whose logo the page shows there. The page is available in Turkish, English and Bosnian.
+A 3D page for sponsors of the IEC Engineering Club shirt in Sarajevo. Members buy the shirt from the club, and 10 shirts go as prizes to members who collect 10 stamps on their IEC Pass. Sponsors pick the white shirt (B) or the black shirt (G), turn it, choose the spots for their logo and get a ready message to send to iusengclub@gmail.com. The flat pattern is wrapped around the body, so prints show at their real size. The right chest spot is taken by Alma Ras, whose logo the page shows there. The page is available in Turkish, English and Bosnian.
