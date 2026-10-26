@@ -8,20 +8,11 @@ Sponsorlar tişörtü döndürür, logolarını koymak istedikleri alanları se�
 
 Bu tişört, IEC Pass kartında 10 damga toplayan üyelere verilir.
 
-## Tasarımlar
+## Tasarım
 
-| | Tasarım | Tişört rengi | Baskı |
-| --- | --- | --- | --- |
-| D | Mühendis defteri: köprü, devre, DNA, robot kol, kanat profili, bina, rüzgâr ve güneş enerjisi, kod | Beyaz | Tüm tişört |
-| E | Çıkartmalar: birçok mühendislik alanından çıkartma | Açık mavi | Tüm tişört |
-| F | Formül duvarı: elektrik, inşaat, makine, bilgisayar, genetik, kimya, endüstri formülleri | Lacivert | Tüm tişört |
-| A | Kulüp mührü | Beyaz | Göğüs + sırt |
-| B | IEC monogram: önde ölçü çizgili kulüp mührü, arkada büyük IEC | Beyaz | Göğüs + sırt |
-| C | Teknik çizim | Beyaz | Göğüs + sırt |
+Sayfa yalnızca seçilen B tasarımını gösterir: beyaz tişört, önde sol göğüste ölçü çizgileriyle kulüp mührü, arkada büyük IEC monogramı ve "We Turn What We Learn in Class Into Real Projects." sloganı.
 
-![Seçenek D](mock/D.jpg)
-![Seçenek E](mock/E.jpg)
-![Seçenek F](mock/F.jpg)
+![Seçilen tasarım B](mock/B2.jpg)
 
 ## Sponsor alanları (yetişkin L beden)
 
@@ -38,4 +29,4 @@ Satılan bir alanı sayfada "Dolu" göstermek için `index.html` içindeki `TAKE
 
 ## English
 
-A 3D page for sponsors of the IEC Engineering Club shirt in Sarajevo. Sponsors turn the shirt, choose the spots for their logo and get a ready message to send to iusengclub@gmail.com. The page is available in Turkish, English and Bosnian.
+A 3D page for sponsors of the IEC Engineering Club shirt in Sarajevo. Sponsors turn the shirt, choose the spots for their logo and get a ready message to send to iusengclub@gmail.com. The page is available in Turkish, English and Bosnian. It shows only the chosen design B: the club seal with drafting details on the left chest and a large IEC monogram on the back.

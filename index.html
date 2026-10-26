@@ -7,7 +7,7 @@
 <meta name="description" content="Choose where your logo goes on the IEC Engineering Club shirt. Turn the 3D shirt, pick sponsor spots and send the club your request.">
 <meta property="og:title" content="IEC Shirt Sponsorship">
 <meta property="og:description" content="Turn the 3D IEC Engineering Club shirt and pick the spot for your logo.">
-<meta property="og:image" content="https://hasankaan28.github.io/iec-tshirt/mock/D.jpg">
+<meta property="og:image" content="https://hasankaan28.github.io/iec-tshirt/mock/B2.jpg">
 <meta property="og:type" content="website">
 <title>IEC Shirt Sponsorship</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -80,11 +80,6 @@ button, input, textarea { font: inherit; color: inherit; }
 #gl { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; cursor: grab; }
 #gl.pointing { cursor: pointer; }
 #fallback { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; padding: 56px 12px; }
-.stage-top { position: absolute; top: 12px; left: 12px; right: 12px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
-.stage-top .label { font: 600 11px/1 var(--mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
-.chips { display: flex; flex-wrap: wrap; gap: 6px; }
-.chips button { border: 1px solid var(--line); background: var(--panel); border-radius: 999px; padding: 7px 11px; font: 600 12px/1 var(--mono); letter-spacing: 0.04em; color: var(--muted); cursor: pointer; }
-.chips button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-fg); }
 .stage-bottom { position: absolute; left: 12px; right: 12px; bottom: 12px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
 .hint { font: 500 12px/1.3 var(--mono); color: var(--muted); }
 
@@ -149,7 +144,7 @@ form { display: flex; flex-direction: column; gap: 12px; }
 <body>
 <div class="app">
   <header class="bar">
-    <div class="brand"><span class="mark" aria-hidden="true">IEC</span><span class="brand-name" data-t="club"></span></div>
+    <div class="brand"><span class="mark" aria-hidden="true">IEC</span><span class="brand-name"><span lang="en">Engineering Club</span>, <span data-t="city"></span></span></div>
     <div class="seg" role="group" aria-label="Language" id="langs">
       <button type="button" data-lang="tr">TR</button><button type="button" data-lang="en">EN</button><button type="button" data-lang="bs">BS</button>
     </div>
@@ -159,10 +154,6 @@ form { display: flex; flex-direction: column; gap: 12px; }
     <h2 id="stageTitle" class="sr-only" data-t="stageTitle"></h2>
     <canvas id="gl"></canvas>
     <img id="fallback" hidden alt="">
-    <div class="stage-top">
-      <span class="label" data-t="design"></span>
-      <div class="chips" role="group" id="designs"></div>
-    </div>
     <div class="stage-bottom">
       <div class="views" role="group" id="views">
         <button type="button" class="view" data-view="front" data-t="front"></button>
@@ -222,18 +213,17 @@ const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 // ---------- words (tr, en, bs)
 const T = {
   en: {
-    club: 'Engineering Club, Sarajevo', stageTitle: 'The IEC shirt in 3D',
+    city: 'Sarajevo', stageTitle: 'The IEC shirt in 3D',
     title: 'Put your logo on the IEC shirt',
     lede: 'Members of IEC Engineering Club earn this shirt by collecting 10 stamps at club events, so the people wearing it are the club\'s most active engineering students. Choose the spots you want, then send us the request below.',
     spotsTitle: 'Sponsor spots', count: n => `Selected: ${n}`, available: 'Available', taken: 'Taken',
-    design: 'Shirt design', designs: { A: 'Seal', B: 'Monogram', C: 'Drawing', D: 'Notebook', E: 'Stickers', F: 'Equations' },
     front: 'Front', back: 'Back', spin: 'Rotate', drag: 'Drag to turn the shirt. Tap a spot to choose it.',
     formTitle: 'Your request', company: 'Company', contact: 'Contact (email or phone)', note: 'Note (optional)', prepare: 'Prepare request',
     errSpot: 'Choose at least one spot.', errCompany: 'Enter your company name.',
     outTitle: 'Message to send', outHelp: 'Copy this message and send it to', copy: 'Copy message', copied: 'Copied', mail: 'Open in email app',
     fine: 'This page does not send anything on its own. Sizes are print sizes on an adult L shirt.',
     subject: 'IEC shirt sponsorship', hello: 'Hello IEC Engineering Club,', want: 'We would like to sponsor the IEC shirt.',
-    lCompany: 'Company', lSpots: 'Spots', lContact: 'Contact', lNote: 'Note', lDesign: 'Shirt design we looked at', thanks: 'Thank you.',
+    lCompany: 'Company', lSpots: 'Spots', lContact: 'Contact', lNote: 'Note', thanks: 'Thank you.',
     spots: {
       front: ['Front chest, main sponsor', 'The largest spot, in the middle of the chest.'],
       chest: ['Right chest', 'A small spot across from the club logo.'],
@@ -244,18 +234,17 @@ const T = {
     },
   },
   tr: {
-    club: 'Engineering Club, Saraybosna', stageTitle: 'IEC tişörtü 3D',
+    city: 'Saraybosna', stageTitle: 'IEC tişörtü 3D',
     title: 'Logonuzu IEC tişörtüne koyun',
     lede: 'IEC Engineering Club üyeleri bu tişörtü kulüp etkinliklerinde 10 damga toplayarak kazanır. Yani onu kulübün en aktif mühendislik öğrencileri giyer. İstediğiniz alanları seçin, sonra aşağıdan talebinizi bize gönderin.',
     spotsTitle: 'Sponsor alanları', count: n => `Seçilen: ${n}`, available: 'Boş', taken: 'Dolu',
-    design: 'Tişört tasarımı', designs: { A: 'Mühür', B: 'Monogram', C: 'Teknik çizim', D: 'Mühendis defteri', E: 'Çıkartmalar', F: 'Formüller' },
     front: 'Ön', back: 'Arka', spin: 'Döndür', drag: 'Tişörtü çevirmek için sürükleyin. Seçmek için bir alana dokunun.',
     formTitle: 'Talebiniz', company: 'Firma', contact: 'İletişim (e-posta ya da telefon)', note: 'Not (isteğe bağlı)', prepare: 'Talebi hazırla',
     errSpot: 'En az bir alan seçin.', errCompany: 'Firma adını yazın.',
     outTitle: 'Gönderilecek mesaj', outHelp: 'Bu mesajı kopyalayıp şu adrese gönderin:', copy: 'Mesajı kopyala', copied: 'Kopyalandı', mail: 'E-posta uygulamasında aç',
     fine: 'Bu sayfa kendi başına hiçbir şey göndermez. Ölçüler, yetişkin L beden tişörtteki baskı ölçüleridir.',
     subject: 'IEC tişört sponsorluğu', hello: 'Merhaba IEC Engineering Club,', want: 'IEC tişörtüne sponsor olmak istiyoruz.',
-    lCompany: 'Firma', lSpots: 'Alanlar', lContact: 'İletişim', lNote: 'Not', lDesign: 'Baktığımız tasarım', thanks: 'Teşekkürler.',
+    lCompany: 'Firma', lSpots: 'Alanlar', lContact: 'İletişim', lNote: 'Not', thanks: 'Teşekkürler.',
     spots: {
       front: ['Ön göğüs, ana sponsor', 'En büyük alan, göğsün ortasında.'],
       chest: ['Sağ göğüs', 'Kulüp logosunun karşısında küçük bir alan.'],
@@ -266,18 +255,17 @@ const T = {
     },
   },
   bs: {
-    club: 'Engineering Club, Sarajevo', stageTitle: 'IEC majica u 3D',
+    city: 'Sarajevo', stageTitle: 'IEC majica u 3D',
     title: 'Stavite svoj logo na IEC majicu',
     lede: 'Članovi IEC Engineering Cluba ovu majicu osvajaju skupljanjem 10 pečata na događajima kluba, pa je nose najaktivniji studenti inženjerstva u klubu. Odaberite mjesta koja želite, a zatim nam pošaljite zahtjev ispod.',
     spotsTitle: 'Sponzorska mjesta', count: n => `Odabrano: ${n}`, available: 'Slobodno', taken: 'Zauzeto',
-    design: 'Dizajn majice', designs: { A: 'Pečat', B: 'Monogram', C: 'Tehnički crtež', D: 'Inženjerska bilježnica', E: 'Naljepnice', F: 'Formule' },
     front: 'Naprijed', back: 'Leđa', spin: 'Okreći', drag: 'Povucite da okrenete majicu. Dodirnite mjesto da ga odaberete.',
     formTitle: 'Vaš zahtjev', company: 'Firma', contact: 'Kontakt (e-mail ili telefon)', note: 'Napomena (nije obavezno)', prepare: 'Pripremi zahtjev',
     errSpot: 'Odaberite barem jedno mjesto.', errCompany: 'Upišite naziv firme.',
     outTitle: 'Poruka za slanje', outHelp: 'Kopirajte ovu poruku i pošaljite je na', copy: 'Kopiraj poruku', copied: 'Kopirano', mail: 'Otvori u e-mail aplikaciji',
     fine: 'Ova stranica sama ništa ne šalje. Mjere su veličine printa na majici veličine L za odrasle.',
     subject: 'Sponzorstvo IEC majice', hello: 'Pozdrav IEC Engineering Club,', want: 'Željeli bismo sponzorisati IEC majicu.',
-    lCompany: 'Firma', lSpots: 'Mjesta', lContact: 'Kontakt', lNote: 'Napomena', lDesign: 'Dizajn majice koji smo gledali', thanks: 'Hvala.',
+    lCompany: 'Firma', lSpots: 'Mjesta', lContact: 'Kontakt', lNote: 'Napomena', thanks: 'Hvala.',
     spots: {
       front: ['Prsa, glavni sponzor', 'Najveće mjesto, na sredini prsa.'],
       chest: ['Desna strana prsa', 'Malo mjesto nasuprot logotipu kluba.'],
@@ -356,19 +344,12 @@ const SPOTS = [
   { id: 'lsleeve', side: 'front', sleeve: 1, cm: '7.5 × 7.5 cm', view: 0.8 },
   { id: 'rsleeve', side: 'front', sleeve: -1, cm: '7.5 × 7.5 cm', view: -0.8 },
 ];
-// A-C are placed prints on a plain shirt; D-F cover the whole shirt (panels span x -17.5..17.5 in, y -0.5..29.5 in).
-const DESIGNS = {
-  A: { front: ['art/A_front.png', 1.9, 4.2, 3.4, 3.4], back: ['art/A_back.png', -5.5, 4.6, 11, 12], shirt: '#f7f7f5', rib: 0xe9ecf0, inner: 0xd9dee5 },
-  B: { front: ['art/B_front_seal.png', 0.6, 3.0, 6.0, 5.9], back: ['art/B_back.png', -5.75, 6.1, 11.5, 9.5], shirt: '#f7f7f5', rib: 0xe9ecf0, inner: 0xd9dee5 },
-  C: { front: ['art/C_front.png', 1.7, 5.22, 3.8, 1.36], back: ['art/C_back.png', -6, 4.6, 12, 12], shirt: '#f7f7f5', rib: 0xe9ecf0, inner: 0xd9dee5 },
-  D: { panel: { front: 'panels/D_front.jpg', back: 'panels/D_back.jpg' }, shirt: '#ffffff', rib: 0xe6e9ee, inner: 0xd5dbe3 },
-  E: { panel: { front: 'panels/E_front.jpg', back: 'panels/E_back.jpg' }, shirt: '#d6e6f5', rib: 0xc3d6ea, inner: 0xaec4dc },
-  F: { panel: { front: 'panels/F_front.jpg', back: 'panels/F_back.jpg' }, shirt: '#0f2f52', rib: 0x0b2440, inner: 0x0a1d33 },
-};
-const ORDER = ['D', 'E', 'F', 'A', 'B', 'C'];
+// The chosen shirt (option B): club seal on the left chest, the big IEC monogram on the back.
+// Each print is [image, x, y, width, height] in inches; back prints are placed as seen from behind.
+const SHIRT = { front: ['art/B_front_seal.png', 0.6, 3.0, 6.0, 5.9], back: ['art/B_back.png', -5.75, 6.1, 11.5, 9.5], fabric: '#f7f7f5', rib: 0xe9ecf0, inner: 0xd9dee5 };
 
 // ---------- state
-const state = { lang: 'en', design: 'D', selected: new Set(), hover: null };
+const state = { lang: 'en', selected: new Set(), hover: null };
 try {
   const saved = localStorage.getItem('iec-sponsor-lang');
   state.lang = T[saved] ? saved : (/^tr/i.test(navigator.language) ? 'tr' : /^(bs|hr|sr)/i.test(navigator.language) ? 'bs' : 'en');
@@ -381,23 +362,12 @@ function renderText() {
   document.documentElement.lang = state.lang;
   for (const el of document.querySelectorAll('[data-t]')) { const v = tx()[el.dataset.t]; if (typeof v === 'string') el.textContent = v; }
   for (const b of document.querySelectorAll('#langs button')) b.setAttribute('aria-pressed', String(b.dataset.lang === state.lang));
-  $('designs').setAttribute('aria-label', tx().design);
   $('views').setAttribute('aria-label', tx().stageTitle);
   $('gl').setAttribute('aria-label', tx().stageTitle);
   $('fallback').alt = tx().stageTitle;
   $('addr').textContent = EMAIL;
-  renderDesigns(); renderSpots();
+  renderSpots();
   if (!$('out').hidden) buildMessage();
-}
-function renderDesigns() {
-  const box = $('designs'); box.textContent = '';
-  for (const k of ORDER) {
-    const b = document.createElement('button');
-    b.type = 'button'; b.textContent = `${k} · ${tx().designs[k]}`;
-    b.setAttribute('aria-pressed', String(state.design === k));
-    b.addEventListener('click', () => setDesign(k));
-    box.appendChild(b);
-  }
 }
 function renderSpots() {
   const ul = $('spots'); ul.textContent = '';
@@ -438,7 +408,7 @@ function buildMessage() {
   const lines = [t.hello, '', t.want, '', `${t.lCompany}: ${$('company').value.trim()}`, `${t.lSpots}:`, ...spots];
   if ($('contact').value.trim()) lines.push(`${t.lContact}: ${$('contact').value.trim()}`);
   if ($('note').value.trim()) lines.push(`${t.lNote}: ${$('note').value.trim()}`);
-  lines.push(`${t.lDesign}: ${state.design} · ${t.designs[state.design]}`, '', t.thanks);
+  lines.push('', t.thanks);
   const text = lines.join('\n');
   $('msg').value = text;
   $('mail').href = `mailto:${EMAIL}?subject=${encodeURIComponent(t.subject)}&body=${encodeURIComponent(text)}`;
@@ -465,23 +435,9 @@ for (const b of document.querySelectorAll('#langs button')) b.addEventListener('
 const PPI = (Math.min(innerWidth, innerHeight) < 700 ? 48 : 72), TW = Math.round(35 * PPI), TH = Math.round(30 * PPI);
 const canvases = { front: document.createElement('canvas'), back: document.createElement('canvas') };
 for (const c of Object.values(canvases)) { c.width = TW; c.height = TH; }
-const images = {}, loading = {};
+const images = {};
 function loadImage(src) {
-  if (!loading[src]) loading[src] = new Promise(res => { const im = new Image(); im.onload = () => { images[src] = im; res(); }; im.onerror = res; im.src = src; });
-  return loading[src];
-}
-function ensureDesign(k) {
-  const d = DESIGNS[k];
-  return Promise.all(d.panel ? [loadImage(d.panel.front), loadImage(d.panel.back)] : [loadImage(d.front[0]), loadImage(d.back[0])]);
-}
-const mats = { rims: [], inner: [] };
-function setDesign(k) {
-  state.design = k; renderDesigns();
-  $('fallback').src = `mock/${k === 'B' ? 'B2' : k}.jpg`;
-  for (const m of mats.rims) m.color.setHex(DESIGNS[k].rib);
-  for (const m of mats.inner) m.color.setHex(DESIGNS[k].inner);
-  paintAll();
-  ensureDesign(k).then(() => { if (state.design === k) paintAll(); });
+  return new Promise(res => { const im = new Image(); im.onload = () => { images[src] = im; res(); }; im.onerror = res; im.src = src; });
 }
 function roundRect(g, x, y, w, h, r) { g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); }
 function spotFrame(g, s) {
@@ -522,13 +478,12 @@ function drawSpot(g, s) {
 const textures = {};
 function paint(side) {
   const g = canvases[side].getContext('2d');
-  const d = DESIGNS[state.design];
   g.setTransform(1, 0, 0, 1, 0, 0);
-  g.fillStyle = d.shirt; g.fillRect(0, 0, TW, TH);
+  g.fillStyle = SHIRT.fabric; g.fillRect(0, 0, TW, TH);
   g.setTransform(PPI, 0, 0, PPI, 17.5 * PPI, 0.5 * PPI);
   g.imageSmoothingQuality = 'high';
-  if (d.panel) { const im = images[d.panel[side]]; if (im) g.drawImage(im, -17.5, -0.5, 35, 30); }
-  else { const [src, x, y, w, h] = d[side]; if (images[src]) g.drawImage(images[src], x, y, w, h); }
+  const [src, x, y, w, h] = SHIRT[side];
+  if (images[src]) g.drawImage(images[src], x, y, w, h);
   for (const s of SPOTS) if (s.side === side) drawSpot(g, s);
   if (textures[side]) textures[side].needsUpdate = true;
 }
@@ -575,9 +530,7 @@ function buildPanel(back) {
 function rim(frontPts, backPts, radius, color) {
   const pts = [...frontPts.map(([x, y]) => new THREE.Vector3(x, Y0 - y, height(x, y, false))), ...backPts.map(([x, y]) => new THREE.Vector3(x, Y0 - y, -height(x, y, true)))];
   const geo = new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts, true, 'centripetal'), Math.max(60, pts.length * 3), radius, 10, true);
-  const mat = new THREE.MeshStandardMaterial({ color, roughness: 0.95 });
-  mats.rims.push(mat);
-  return new THREE.Mesh(geo, mat);
+  return new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ color, roughness: 0.95 }));
 }
 function fabricNormalMap() {
   const c = document.createElement('canvas'); c.width = c.height = 256;
@@ -608,11 +561,9 @@ function init3d() {
     const geo = buildPanel(side === 'back');
     const outer = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ map: tex, roughness: 0.93, normalMap: fnm, normalScale: new THREE.Vector2(0.18, 0.18), side: THREE.FrontSide }));
     outer.userData.side = side; meshes.push(outer); scene.add(outer);
-    const innerMat = new THREE.MeshStandardMaterial({ color: DESIGNS[state.design].inner, roughness: 1, side: THREE.BackSide });
-    mats.inner.push(innerMat);
-    scene.add(new THREE.Mesh(geo, innerMat));
+    scene.add(new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ color: SHIRT.inner, roughness: 1, side: THREE.BackSide })));
   }
-  const rib = DESIGNS[state.design].rib;
+  const rib = SHIRT.rib;
   scene.add(rim(neckline(3.3), neckline(0.9).reverse().slice(1, -1), 0.3, rib));
   scene.add(rim(HEM, [...HEM].reverse().slice(1, -1), 0.11, rib));
   const cuff = sg => { const a = [P.C1[0] * sg, P.C1[1]], b = [P.C2[0] * sg, P.C2[1]], line = []; for (let i = 0; i <= 16; i++) line.push([a[0] + (b[0] - a[0]) * i / 16, a[1] + (b[1] - a[1]) * i / 16]); return rim(line, [...line].reverse().slice(1, -1), 0.11, rib); };
@@ -716,10 +667,10 @@ function setupPicking() {
 
 // ---------- start
 renderText();
-$('fallback').src = `mock/${state.design}.jpg`;
+$('fallback').src = 'mock/B2.jpg';
 const fontsReady = Promise.all([document.fonts.load('700 40px "Space Grotesk"'), document.fonts.load('600 20px "JetBrains Mono"')]).catch(() => {});
 document.fonts.addEventListener('loadingdone', () => paintAll());
-Promise.all([ensureDesign(state.design), fontsReady]).then(() => {
+Promise.all([loadImage(SHIRT.front[0]), loadImage(SHIRT.back[0]), fontsReady]).then(() => {
   paintAll();
   try { init3d(); }
   catch (err) { canvas.hidden = true; $('fallback').hidden = false; $('views').hidden = true; }
