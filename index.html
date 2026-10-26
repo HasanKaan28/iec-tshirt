@@ -208,7 +208,7 @@ form { display: flex; flex-direction: column; gap: 12px; }
 </div>
 
 <script type="importmap">
-{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/" } }
+{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/" } }
 </script>
 <script type="module">
 import * as THREE from 'three';
@@ -344,8 +344,8 @@ const SPOTS = [
 // G: black, white seal on the left chest, IEC drawn as a 3D technical drawing on the back.
 // Each print is [image, x, y, width, height] in inches; back prints are placed as seen from behind.
 const DESIGNS = {
-  B: { front: ['art/B_front_seal.png', 0.6, 3.0, 6.0, 5.9], back: ['art/B_back.png', -5.75, 6.1, 11.5, 9.5], fabric: '#f7f7f5', rib: 0xe9ecf0, inner: 0xd9dee5, sheen: '#ffffff', exposure: 1.02, mock: 'mock/B2.jpg' },
-  G: { front: ['art/G_front.png', 1.7, 4.1, 3.8, 3.8], back: ['art/G_back.png', -6.0, 5.8, 12, 10], fabric: '#161616', rib: 0x1c1c1c, inner: 0x0f0f0f, sheen: '#5e5e5e', exposure: 0.85, mock: 'mock/G.jpg', dark: true },
+  B: { front: ['art/B_front_seal.png', 0.6, 3.0, 6.0, 5.9], back: ['art/B_back.png', -5.75, 6.1, 11.5, 9.5], fabric: '#f7f7f5', rib: 0xe9ecf0, inner: 0xd9dee5, sheen: '#ffffff', exposure: 0.86, mock: 'mock/B2.jpg' },
+  G: { front: ['art/G_front.png', 1.7, 4.1, 3.8, 3.8], back: ['art/G_back.png', -6.0, 5.8, 12, 10], fabric: '#161616', rib: 0x1c1c1c, inner: 0x0f0f0f, sheen: '#5e5e5e', exposure: 1.0, mock: 'mock/G.jpg', dark: true },
 };
 const ORDER = ['B', 'G'];
 
@@ -559,202 +559,107 @@ function paint(side) {
 }
 function paintAll() { paint('front'); paint('back'); }
 
-// ---------- 3D: a ghost-mannequin T-shirt. The flat pattern is wrapped around an invisible body, so pattern
-// coordinates are also texture coordinates and every print keeps its real size on the fabric.
+// ---------- 3D: the shirt comes from a cloth simulation run once offline (drape.py). The flat front and back panels
+// were sewn together and settled by gravity on an invisible mannequin. Every vertex keeps its flat-pattern
+// coordinates, so the texture coordinates are the pattern and every print keeps its real size on the fabric.
 const canvas = $('gl');
-let renderer, scene, camera, controls, anim = null;
-const meshes = [], cloth = [];
-const SUPER = 2.05;                // body cross-section: a superellipse, a touch fuller than an ellipse
-const DEPTH = [[0, 2.5], [1.7, 2.9], [5, 3.8], [9.6, 4.25], [18, 4.05], [28.6, 4.3]];   // half depth of the body (in) by height
-const ARM = 47 * Math.PI / 180;    // the sleeves hang 47 degrees below horizontal
-const SLEEVE_LEN = 6.4;
-const smooth = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
-function keyed(keys, x) {
-  if (x <= keys[0][0]) return keys[0][1];
-  for (let i = 1; i < keys.length; i++) if (x <= keys[i][0]) {
-    const [x0, y0] = keys[i - 1], [x1, y1] = keys[i];
-    return y0 + (y1 - y0) * (1 - Math.cos(Math.PI * (x - x0) / (x1 - x0))) / 2;
-  }
-  return keys[keys.length - 1][1];
+let renderer, scene, camera, controls, anim = null, garment = null, garmentData = null;
+const meshes = [];
+function loadJSON(url) {
+  return new Promise((res, rej) => {
+    const r = new XMLHttpRequest();
+    r.open('GET', url); r.responseType = 'json';
+    r.onload = () => (r.response ? res(r.response) : rej(new Error('no garment data')));
+    r.onerror = () => rej(new Error('garment data did not load'));
+    r.send();
+  });
 }
-// Flat half-width of the body at height py: shoulder line, then armhole, then side seam.
-function sideX(py) {
-  if (py <= P.S[1]) return P.N[0] + (P.S[0] - P.N[0]) * Math.max(0, py) / P.S[1];
-  if (py <= P.A[1]) return P.S[0] + (P.A[0] - P.S[0]) * (py - P.S[1]) / (P.A[1] - P.S[1]);
-  return P.A[0] + (P.H[0] - P.A[0]) * (py - P.A[1]) / (P.H[1] - P.A[1]);
-}
-const se = (a, b, t) => { const c = Math.cos(t), s = Math.sin(t); return [a * Math.sign(c) * Math.abs(c) ** (2 / SUPER), b * Math.sign(s) * Math.abs(s) ** (2 / SUPER)]; };
-const rings = new Map();
-// Body cross-section at height py. Its quarter perimeter equals the flat half-width, so the side seams land at the sides.
-function ring(py) {
-  const key = Math.round(py * 200);
-  if (rings.has(key)) return rings.get(key);
-  const Q = sideX(py), b = keyed(DEPTH, py);
-  const table = a => {
-    const tab = [0];
-    let prev = se(a, b, Math.PI / 2);
-    for (let i = 1; i <= 96; i++) { const p = se(a, b, Math.PI / 2 * (1 - i / 96)); tab.push(tab[i - 1] + Math.hypot(p[0] - prev[0], p[1] - prev[1])); prev = p; }
-    return tab;
-  };
-  let lo = 0.1, hi = 24;
-  for (let k = 0; k < 30; k++) { const mid = (lo + hi) / 2; if (table(mid)[96] < Q) lo = mid; else hi = mid; }
-  const r = { a: (lo + hi) / 2, b };
-  r.tab = table(r.a);
-  rings.set(key, r);
-  return r;
-}
-// A flat point (px across from the centre line, py down from the shoulder line) placed on the front of the body.
-function wrapTorso(px, py) {
-  const r = ring(py), L = Math.min(Math.abs(px), r.tab[96]);
-  let i = 0;
-  while (i < 95 && r.tab[i + 1] < L) i++;
-  const f = (L - r.tab[i]) / Math.max(1e-9, r.tab[i + 1] - r.tab[i]);
-  const [x, z] = se(r.a, r.b, Math.PI / 2 * (1 - (i + f) / 96));
-  return [Math.sign(px) * x, Y0 - py, z];
-}
-const uvOf = (px, py) => [(px + 17.5) / 35, 1 - (py + 0.5) / 30];
-// Front or back body panel: the flat outline without the sleeves, meshed on a grid and wrapped.
-function buildTorso(back, h) {
-  const poly = [...neckline(back ? 0.9 : 3.3), P.S, P.A, ...HEM, [-P.A[0], P.A[1]], [-P.S[0], P.S[1]]];
-  const x0 = -11, y0 = -0.4, nx = Math.ceil(22 / h), ny = Math.ceil(29.4 / h);
-  const used = new Int32Array((nx + 1) * (ny + 1)).fill(-1), tris = [];
-  const vx = k => x0 + (k % (nx + 1)) * h, vy = k => y0 + Math.floor(k / (nx + 1)) * h;
-  for (let j = 0; j < ny; j++) for (let i = 0; i < nx; i++) {
-    const a = j * (nx + 1) + i, b = a + 1, c = a + nx + 1, d = c + 1;
-    for (const t of [[a, c, b], [b, c, d]]) {
-      // keep cells that touch the outline too; their outside corners are pulled onto it, so the edges stay smooth
-      const cx = (vx(t[0]) + vx(t[1]) + vx(t[2])) / 3, cy = (vy(t[0]) + vy(t[1]) + vy(t[2])) / 3;
-      const touches = t.some(k => inside(vx(k), vy(k), poly)) && nearest(cx, cy, poly)[2] < h * 0.8;
-      if (inside(cx, cy, poly) || touches) { tris.push(t); for (const k of t) used[k] = 0; }
+function unpack(b64, T) { const s = atob(b64), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return new T(u.buffer); }
+function buildGarment(g) {
+  const base = unpack(g.pos, Float32Array);
+  const G = { base, cur: Float32Array.from(base), normal: new Float32Array(base.length), sway: unpack(g.sway, Uint8Array), neck: unpack(g.neck, Uint16Array), panels: [] };
+  const ao = unpack(g.ao, Uint8Array), all = [];
+  for (const side of ['front', 'back']) {
+    const pid = unpack(g[side].pid, Uint16Array), flat = unpack(g[side].flat, Float32Array), tri = Uint16Array.from(unpack(g[side].tri, Uint16Array));
+    const n = pid.length, uv = new Float32Array(n * 2), col = new Float32Array(n * 3);
+    for (let i = 0; i < n; i++) {
+      const x = flat[2 * i], y = flat[2 * i + 1];
+      uv[2 * i] = ((side === 'back' ? -x : x) + 17.5) / 35; uv[2 * i + 1] = 1 - (y + 0.5) / 30;
+      col[3 * i] = col[3 * i + 1] = col[3 * i + 2] = ao[pid[i]] / 255;
     }
-  }
-  const part = { kind: 'torso', pos: [], uv: [], flat: [], out: [], index: [] };
-  let n = 0;
-  for (let k = 0; k < used.length; k++) {
-    if (used[k] < 0) continue;
-    let x = vx(k), y = vy(k);
-    const [nxp, nyp, dist] = nearest(x, y, poly);
-    if (!inside(x, y, poly) || dist < h * 0.35) { x = nxp; y = nyp; }
-    const [X, Y, Z] = wrapTorso(x, y), sx = back ? -X : X, sz = back ? -Z : Z;
-    part.pos.push(sx, Y, sz); part.out.push(sx, 0, sz);
-    part.uv.push(...uvOf(x, y)); part.flat.push(x, y, 0, 0);
-    used[k] = n++;
-  }
-  for (const t of tris) part.index.push(...t.map(k => used[k]));
-  return part;
-}
-// Half a sleeve (front or back): a tube whose rings turn from the upright armhole to the round cuff.
-function buildSleeve(sgn, back) {
-  const NU = 24, NF = 30, part = { kind: 'sleeve', pos: [], uv: [], flat: [], out: [], index: [] };
-  const Z = new THREE.Vector3(0, 0, 1), D3 = new THREE.Vector3(sgn * Math.cos(ARM), -Math.sin(ARM), 0.05).normalize();
-  const C0 = new THREE.Vector3(sgn * 8.15, Y0 - (P.S[1] + P.A[1]) / 2, 0);
-  const A0 = (P.A[1] - P.S[1]) / 2 + 0.15, B0 = 2.05, A1 = 2.5, B1 = 2.25;
-  const ps = back ? -sgn : sgn;   // the back pattern is seen from behind, so its x runs the other way
-  for (let i = 0; i <= NU; i++) {
-    const t = i / NU, e = t * t * (3 - 2 * t);
-    const n = new THREE.Vector3(sgn, 0, 0).lerp(D3, e).normalize();
-    const e1 = Z.clone().cross(n).multiplyScalar(sgn).normalize();
-    const c = C0.clone().addScaledVector(D3, SLEEVE_LEN * t);
-    const A = A0 + (A1 - A0) * e, B = B0 + (B1 - B0) * t;
-    const top = [P.S[0] + (P.C1[0] - P.S[0]) * t, P.S[1] + (P.C1[1] - P.S[1]) * t];
-    const bot = bez2(P.C2, [P.A[0] + 0.4, P.A[1] + 0.6], P.A, 1 - t);
-    for (let j = 0; j <= NF; j++) {
-      const g = j / NF, phi = Math.PI * g;   // 0 at the top seam, PI at the underarm seam
-      const p = c.clone().addScaledVector(e1, A * Math.cos(phi)).addScaledVector(Z, (back ? -B : B) * Math.sin(phi));
-      // the sleeve grows out of the body: its root sits just inside the torso surface, so no gap opens at the armhole
-      const k = smooth(0, 0.32, t);
-      if (k < 1) {
-        const r = ring(Math.max(0, Y0 - p.y)), zr = Math.min(1, Math.abs(p.z) / r.b);
-        const xs = Math.max(0, r.a * Math.pow(Math.max(0, 1 - Math.pow(zr, SUPER)), 1 / SUPER) - 0.3);
-        p.x = sgn * xs + (p.x - sgn * xs) * k;
-      }
-      const px = ps * (top[0] + (bot[0] - top[0]) * g), py = top[1] + (bot[1] - top[1]) * g;
-      part.pos.push(p.x, p.y, p.z); part.out.push(p.x - c.x, p.y - c.y, p.z - c.z);
-      part.uv.push(...uvOf(px, py)); part.flat.push(px, py, t, g);
+    // wind the triangles so they face away from the body
+    let s = 0;
+    for (let t = 0; t < tri.length; t += 3) {
+      const a = 3 * pid[tri[t]], b = 3 * pid[tri[t + 1]], c = 3 * pid[tri[t + 2]];
+      const ux = base[b] - base[a], uy = base[b + 1] - base[a + 1], uz = base[b + 2] - base[a + 2];
+      const vx = base[c] - base[a], vy = base[c + 1] - base[a + 1], vz = base[c + 2] - base[a + 2];
+      s += (uy * vz - uz * vy) * base[a] + (ux * vy - uy * vx) * base[a + 2];
     }
+    if (s < 0) for (let t = 0; t < tri.length; t += 3) { const k = tri[t + 1]; tri[t + 1] = tri[t + 2]; tri[t + 2] = k; }
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(n * 3), 3));
+    geo.setAttribute('normal', new THREE.BufferAttribute(new Float32Array(n * 3), 3));
+    geo.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
+    geo.setAttribute('color', new THREE.BufferAttribute(col, 3));
+    geo.setIndex(new THREE.BufferAttribute(tri, 1));
+    G.panels.push({ side, pid, geo });
+    for (let t = 0; t < tri.length; t++) all.push(pid[tri[t]]);
   }
-  for (let i = 0; i < NU; i++) for (let j = 0; j < NF; j++) {
-    const a = i * (NF + 1) + j, b = a + 1, c = a + NF + 1, d = c + 1;
-    part.index.push(a, c, b, b, c, d);
+  G.tris = Uint32Array.from(all);
+  updateGarment(G);
+  for (const p of G.panels) { p.geo.computeBoundingSphere(); p.geo.boundingSphere.radius += 2; }
+  return G;
+}
+// Normals are summed over both panels, so the sewn seams shade smoothly; then each panel copies its vertices.
+function updateGarment(G) {
+  const P = G.cur, Nn = G.normal, T = G.tris;
+  Nn.fill(0);
+  for (let t = 0; t < T.length; t += 3) {
+    const a = 3 * T[t], b = 3 * T[t + 1], c = 3 * T[t + 2];
+    const ux = P[b] - P[a], uy = P[b + 1] - P[a + 1], uz = P[b + 2] - P[a + 2];
+    const vx = P[c] - P[a], vy = P[c + 1] - P[a + 1], vz = P[c + 2] - P[a + 2];
+    const nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
+    for (const k of [a, b, c]) { Nn[k] += nx; Nn[k + 1] += ny; Nn[k + 2] += nz; }
   }
-  return part;
-}
-// Folds pressed into the cloth, faded out at the seams so front and back still meet.
-const ARMPIT_FOLDS = [[[9.9, 10.6], [6.2, 13.6], 0.17], [[9.7, 12.6], [7.1, 16.4], 0.1], [[8.6, 3.2], [5.4, 5.8], 0.06]];
-function seamFade(part, px, py, g) { return part.kind === 'torso' ? smooth(0, 1.4, sideX(py) - Math.abs(px)) : smooth(0, 0.14, g) * smooth(0, 0.14, 1 - g); }
-function foldAt(part, px, py, t, g) {
-  if (part.kind === 'torso') {
-    const ax = Math.abs(px);
-    let d = 0.22 * smooth(14, 28.5, py) * Math.sin(px * 0.82 + 1.2) * (0.75 + 0.25 * Math.sin(px * 2.3 + 0.4));
-    for (const [a, b, depth] of ARMPIT_FOLDS) d -= depth * Math.exp(-((segDist(ax, py, a, b) / 0.6) ** 2));
-    return d + 0.035 * Math.sin(px * 1.7 + py * 0.9) * Math.sin(py * 0.6 - px * 0.4);
+  for (let k = 0; k < Nn.length; k += 3) { const l = Math.hypot(Nn[k], Nn[k + 1], Nn[k + 2]) || 1; Nn[k] /= l; Nn[k + 1] /= l; Nn[k + 2] /= l; }
+  for (const p of G.panels) {
+    const pos = p.geo.attributes.position.array, nor = p.geo.attributes.normal.array;
+    for (let i = 0; i < p.pid.length; i++) {
+      const k = 3 * p.pid[i];
+      pos[3 * i] = P[k]; pos[3 * i + 1] = P[k + 1]; pos[3 * i + 2] = P[k + 2];
+      nor[3 * i] = Nn[k]; nor[3 * i + 1] = Nn[k + 1]; nor[3 * i + 2] = Nn[k + 2];
+    }
+    p.geo.attributes.position.needsUpdate = true; p.geo.attributes.normal.needsUpdate = true;
   }
-  return -0.12 * Math.exp(-(((g - 0.8) / 0.2) ** 2)) * (0.6 + 0.4 * Math.sin(t * 19)) + 0.05 * Math.sin(t * 8 + g * 5);
 }
-function aoAt(part, px, py, t, g) {
-  if (part.kind === 'torso') return 1 - 0.3 * smooth(6.5, 10.2, Math.abs(px)) * Math.exp(-(((py - 10.5) / 3.2) ** 2)) - 0.06 * smooth(24, 28.5, py);
-  return 1 - 0.32 * Math.exp(-(((g - 1) / 0.32) ** 2)) * (1 - t) ** 1.4;
-}
-function orient(geo, out) {
-  const nm = geo.attributes.normal.array;
-  let s = 0;
-  for (let i = 0; i < out.length; i += 3) s += nm[i] * out[i] + nm[i + 1] * out[i + 1] + nm[i + 2] * out[i + 2];
-  if (s >= 0) return;
-  const idx = geo.index.array;
-  for (let i = 0; i < idx.length; i += 3) { const k = idx[i + 1]; idx[i + 1] = idx[i + 2]; idx[i + 2] = k; }
-  geo.index.needsUpdate = true;
-  geo.computeVertexNormals();
-}
-function makeCloth(part) {
-  const geo = new THREE.BufferGeometry();
-  geo.setAttribute('position', new THREE.Float32BufferAttribute(part.pos, 3));
-  geo.setAttribute('uv', new THREE.Float32BufferAttribute(part.uv, 2));
-  geo.setIndex(part.index);
-  geo.computeVertexNormals();
-  orient(geo, part.out);
-  const p = geo.attributes.position.array, nm = geo.attributes.normal.array, f = part.flat;
-  const count = f.length / 4, col = new Float32Array(count * 3), w = new Float32Array(count), fade = new Float32Array(count);
-  for (let i = 0; i < count; i++) {
-    const px = f[4 * i], py = f[4 * i + 1], t = f[4 * i + 2], g = f[4 * i + 3];
-    fade[i] = seamFade(part, px, py, g);
-    const d = foldAt(part, px, py, t, g) * fade[i];
-    for (let k = 0; k < 3; k++) p[3 * i + k] += nm[3 * i + k] * d;
-    col[3 * i] = col[3 * i + 1] = col[3 * i + 2] = aoAt(part, px, py, t, g) - Math.max(0, -d) * 0.6;
-    w[i] = part.kind === 'torso' ? smooth(2, 28.5, py) ** 1.25 : 0.05 + 0.6 * t ** 1.3;
-  }
-  geo.setAttribute('color', new THREE.Float32BufferAttribute(col, 3));
-  geo.computeVertexNormals();
-  geo.computeBoundingSphere();
-  geo.boundingSphere.radius += 1;
-  cloth.push({ geo, base: Float32Array.from(p), normal: Float32Array.from(geo.attributes.normal.array), w, fade, flat: f });
-  return geo;
-}
-// The cloth moves like a slow liquid: waves run down the shirt, and the hem swings when the shirt is turned.
+// The cloth moves like a slow liquid: a breeze runs through the loose parts, and the hem swings when the shirt is turned.
 let swing = 0, swingV = 0, lastAz = null, lastOmega = 0, lastNow = null;
 function deform(time) {
-  for (const c of cloth) {
-    const p = c.geo.attributes.position.array, b = c.base, n = c.normal, f = c.flat;
-    for (let i = 0, k = 0; i < c.w.length; i++, k += 3) {
-      const w = c.w[i], px = f[4 * i], py = f[4 * i + 1];
-      const d = w * c.fade[i] * (0.2 * Math.sin(0.42 * py - 1.25 * time + 0.5 * px) + 0.09 * Math.sin(0.85 * px - 0.27 * py + 0.95 * time));
-      let x = b[k] + n[k] * d, z = b[k + 2] + n[k + 2] * d;
-      const beta = swing * w * w;
-      if (beta) { const cs = Math.cos(beta), sn = Math.sin(beta), xx = x * cs - z * sn; z = x * sn + z * cs; x = xx; }
-      p[k] = x; p[k + 1] = b[k + 1] + n[k + 1] * d; p[k + 2] = z;
-    }
-    c.geo.attributes.position.needsUpdate = true;
-    c.geo.computeVertexNormals();
+  const G = garment;
+  if (!G) return;
+  const b = G.base, c = G.cur, w = G.sway;
+  for (let i = 0, k = 0; i < w.length; i++, k += 3) {
+    const s = w[i] / 255, x = b[k], y = b[k + 1], z = b[k + 2];
+    if (s < 0.01) { c[k] = x; c[k + 1] = y; c[k + 2] = z; continue; }
+    let dx = s * (0.1 * Math.sin(0.35 * y - 1.1 * time + 0.2 * x) + 0.06 * Math.sin(0.6 * x - 0.8 * time));
+    let dz = s * (0.14 * Math.sin(0.3 * x + 0.25 * y - 1.3 * time + 1.7) + 0.07 * Math.sin(0.45 * y - 0.9 * time));
+    const dy = s * 0.03 * Math.sin(0.4 * x + 0.3 * z - time);
+    let px = x + dx, pz = z + dz;
+    const beta = swing * s * s;
+    if (beta) { const cs = Math.cos(beta), sn = Math.sin(beta), xx = px * cs - pz * sn; pz = px * sn + pz * cs; px = xx; }
+    c[k] = px; c[k + 1] = y + dy; c[k + 2] = pz;
   }
+  updateGarment(G);
 }
 function collar(knit) {
-  const f = neckline(3.3).map(([x, y]) => { const [X, Y, Z] = wrapTorso(x, y); return new THREE.Vector3(X, Y, Z); });
-  const b = neckline(0.9).map(([x, y]) => { const [X, Y, Z] = wrapTorso(x, y); return new THREE.Vector3(-X, Y, -Z); });
-  const curve = new THREE.CatmullRomCurve3([...f, ...b.slice(1, -1)], true, 'centripetal');
+  const P = garment.base, pts = [];
+  for (const i of garment.neck) pts.push(new THREE.Vector3(P[3 * i], P[3 * i + 1], P[3 * i + 2]));
+  const curve = new THREE.CatmullRomCurve3(pts, true, 'centripetal');
   const tex = knit.clone(); tex.repeat.set(260, 2); tex.needsUpdate = true;
   const d = DESIGNS[state.design];
   const mat = new THREE.MeshPhysicalMaterial({ color: d.rib, roughness: 0.95, envMapIntensity: 0.55, sheen: 1, sheenRoughness: 0.8, sheenColor: new THREE.Color(d.sheen), normalMap: tex, normalScale: new THREE.Vector2(0.6, 0.6) });
   mats.rib.push(mat);
-  const m = new THREE.Mesh(new THREE.TubeGeometry(curve, 220, 0.22, 12, true), mat);
+  const m = new THREE.Mesh(new THREE.TubeGeometry(curve, 220, 0.24, 12, true), mat);
   m.castShadow = m.receiveShadow = true;
   return m;
 }
@@ -779,35 +684,32 @@ function init3d() {
   renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
-  renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = DESIGNS[state.design].exposure;
+  renderer.toneMapping = THREE.NeutralToneMapping; renderer.toneMappingExposure = DESIGNS[state.design].exposure;
   renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   scene = new THREE.Scene();
   const pmrem = new THREE.PMREMGenerator(renderer);
   scene.environment = pmrem.fromScene(new RoomEnvironment(renderer), 0.04).texture;
   camera = new THREE.PerspectiveCamera(28, 1, 1, 600);
-  scene.add(new THREE.HemisphereLight(0xffffff, 0xb9c3cf, 0.3));
-  const key = new THREE.DirectionalLight(0xffffff, 1.15); key.position.set(-20, 45, 40);
+  scene.add(new THREE.HemisphereLight(0xffffff, 0xb9c3cf, 0.2));
+  const key = new THREE.DirectionalLight(0xffffff, 1.45); key.position.set(-22, 40, 38);
   key.castShadow = true; key.shadow.mapSize.set(2048, 2048);
   Object.assign(key.shadow.camera, { left: -22, right: 22, top: 24, bottom: -24, near: 10, far: 140 });
   key.shadow.bias = -0.0004; key.shadow.normalBias = 0.04;
   scene.add(key);
   const rimL = new THREE.DirectionalLight(0xdfe9ff, 0.5); rimL.position.set(40, 12, -50); scene.add(rimL);
-  const knit = knitNormalMap(), d = DESIGNS[state.design], small = Math.min(innerWidth, innerHeight) < 700;
-  for (const side of ['front', 'back']) {
-    const tex = new THREE.CanvasTexture(canvases[side]);
+  const knit = knitNormalMap(), d = DESIGNS[state.design];
+  garment = buildGarment(garmentData);
+  for (const p of garment.panels) {
+    const tex = new THREE.CanvasTexture(canvases[p.side]);
     tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
-    textures[side] = tex;
-    const outer = new THREE.MeshPhysicalMaterial({ map: tex, vertexColors: true, roughness: 0.92, envMapIntensity: 0.55, sheen: 1, sheenRoughness: 0.75, sheenColor: new THREE.Color(d.sheen), normalMap: knit, normalScale: new THREE.Vector2(0.32, 0.32) });
+    textures[p.side] = tex;
+    const outer = new THREE.MeshPhysicalMaterial({ map: tex, vertexColors: true, roughness: 0.92, envMapIntensity: 0.42, sheen: 1, sheenRoughness: 0.75, sheenColor: new THREE.Color(d.sheen), normalMap: knit, normalScale: new THREE.Vector2(0.32, 0.32) });
     const inner = new THREE.MeshStandardMaterial({ color: d.inner, vertexColors: true, roughness: 1, envMapIntensity: 0.4, side: THREE.BackSide, normalMap: knit, normalScale: new THREE.Vector2(0.3, 0.3) });
     mats.outer.push(outer); mats.inner.push(inner);
-    const back = side === 'back';
-    for (const part of [buildTorso(back, small ? 0.42 : 0.3), buildSleeve(1, back), buildSleeve(-1, back)]) {
-      const geo = makeCloth(part);
-      const m = new THREE.Mesh(geo, outer);
-      m.castShadow = m.receiveShadow = true; m.userData.side = side;
-      meshes.push(m); scene.add(m);
-      const mi = new THREE.Mesh(geo, inner); mi.receiveShadow = true; scene.add(mi);
-    }
+    const m = new THREE.Mesh(p.geo, outer);
+    m.castShadow = m.receiveShadow = true; m.userData.side = p.side;
+    meshes.push(m); scene.add(m);
+    const mi = new THREE.Mesh(p.geo, inner); mi.receiveShadow = true; scene.add(mi);
   }
   scene.add(collar(knit));
   // soft contact shadow under the hem
@@ -932,12 +834,14 @@ renderText();
 $('fallback').src = DESIGNS[state.design].mock;
 const fontsReady = Promise.all([document.fonts.load('700 40px "Space Grotesk"'), document.fonts.load('600 20px "JetBrains Mono"')]).catch(() => {});
 document.fonts.addEventListener('loadingdone', () => paintAll());
-Promise.all([ensureDesign(state.design), fontsReady]).then(() => {
+const showFallback = () => { canvas.hidden = true; $('fallback').hidden = false; $('views').hidden = true; };
+Promise.all([ensureDesign(state.design), fontsReady, loadJSON('garment.json')]).then(([, , g]) => {
+  garmentData = g;
   paintAll();
   try { init3d(); }
-  catch (err) { canvas.hidden = true; $('fallback').hidden = false; $('views').hidden = true; }
+  catch (err) { showFallback(); }
   for (const k of ORDER) ensureDesign(k);
-});
+}, showFallback);
 </script>
 
 </body>

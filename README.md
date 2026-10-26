@@ -20,7 +20,7 @@ Bu tişört, IEC Pass kartında 10 damga toplayan üyelere verilir.
 
 Doğrudan bir tişörte link vermek için: `?shirt=G` (siyah) ya da `?shirt=B` (beyaz). Arkadan açmak için `&view=back` ekleyin.
 
-3D model, düz kalıbı gövdeye sarar. Bu yüzden baskılar kumaş üstünde gerçek ölçüleriyle görünür.
+3D tişört bir kumaş simülasyonundan gelir: ön ve arka kalıp dikiş yerlerinden birleştirilir ve görünmez bir mankenin üzerinde yerçekimiyle oturtulur. Kıvrımlar bu yüzden kendiliğinden oluşur. Her nokta kalıptaki yerini bildiği için baskılar kumaş üstünde gerçek ölçüleriyle görünür. Simülasyonun sonucu `garment.json` dosyasındadır.
 
 ## Sponsor alanları (yetişkin L beden)
 
