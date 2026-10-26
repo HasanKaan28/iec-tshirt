@@ -14,11 +14,12 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600;700&family=Space+Grotesk:wght@500;700&display=swap">
 <style>
-/* Layout: one-screen tool. The shirt turns on a drafting-table stage at the left; the sponsor spots and the request form sit in a panel on the right, stacked under the stage on phones. */
+/* Layout: one-screen tool. The shirt turns on a photo-studio stage at the left; the sponsor spots and the request form sit in a panel on the right, stacked under the stage on phones. */
 :root {
   --bg: #e8edf4;
-  --stage: #dde5ef;
-  --stage-grid: rgba(21, 74, 127, 0.07);
+  --stage: #e9edf2;
+  --stage-hi: #ffffff;
+  --stage-lo: #d3dae3;
   --panel: #ffffff;
   --fg: #0f2f52;
   --muted: #4f627a;
@@ -36,12 +37,12 @@
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #0a1626; --stage: #0f2034; --stage-grid: rgba(141, 179, 220, 0.07); --panel: #102440; --fg: #e7eef7; --muted: #a3b4c8; --line: #233a59;
+    --bg: #0a1626; --stage: #142a44; --stage-hi: #23405f; --stage-lo: #0c1b2e; --panel: #102440; --fg: #e7eef7; --muted: #a3b4c8; --line: #233a59;
     --accent: #8db3dc; --accent-fg: #0a1626; --accent-soft: #17314f; --honey: #ecc246; --ok: #7cc293; --ok-soft: #16301f; --warn: #f0a596; color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --bg: #0a1626; --stage: #0f2034; --stage-grid: rgba(141, 179, 220, 0.07); --panel: #102440; --fg: #e7eef7; --muted: #a3b4c8; --line: #233a59;
+  --bg: #0a1626; --stage: #142a44; --stage-hi: #23405f; --stage-lo: #0c1b2e; --panel: #102440; --fg: #e7eef7; --muted: #a3b4c8; --line: #233a59;
   --accent: #8db3dc; --accent-fg: #0a1626; --accent-soft: #17314f; --honey: #ecc246; --ok: #7cc293; --ok-soft: #16301f; --warn: #f0a596; color-scheme: dark;
 }
 html, body { height: 100%; }
@@ -73,13 +74,15 @@ button, input, textarea { font: inherit; color: inherit; }
 .stage {
   position: relative; min-height: 0; border-radius: 14px; overflow: hidden;
   background:
-    linear-gradient(var(--stage-grid) 1px, transparent 1px) 0 0 / 28px 28px,
-    linear-gradient(90deg, var(--stage-grid) 1px, transparent 1px) 0 0 / 28px 28px,
-    radial-gradient(120% 90% at 50% 40%, var(--panel) 0%, var(--stage) 70%);
+    linear-gradient(to bottom, transparent 72%, rgba(15, 47, 82, 0.05) 100%),
+    radial-gradient(110% 80% at 50% 30%, var(--stage-hi) 0%, var(--stage) 55%, var(--stage-lo) 100%);
 }
 #gl { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; cursor: grab; }
 #gl.pointing { cursor: pointer; }
 #fallback { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; padding: 56px 12px; }
+.stage-top { position: absolute; top: 12px; left: 12px; right: 12px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.stage-top .label { font: 600 11px/1 var(--mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+.swatch { display: inline-block; width: 10px; height: 10px; margin-right: 7px; border-radius: 50%; border: 1px solid #9aa5b1; vertical-align: -1px; }
 .stage-bottom { position: absolute; left: 12px; right: 12px; bottom: 12px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
 .hint { font: 500 12px/1.3 var(--mono); color: var(--muted); }
 
@@ -154,6 +157,10 @@ form { display: flex; flex-direction: column; gap: 12px; }
     <h2 id="stageTitle" class="sr-only" data-t="stageTitle"></h2>
     <canvas id="gl"></canvas>
     <img id="fallback" hidden alt="">
+    <div class="stage-top">
+      <span class="label" data-t="design"></span>
+      <div class="seg" role="group" id="designs"></div>
+    </div>
     <div class="stage-bottom">
       <div class="views" role="group" id="views">
         <button type="button" class="view" data-view="front" data-t="front"></button>
@@ -205,6 +212,7 @@ form { display: flex; flex-direction: column; gap: 12px; }
 <script type="module">
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 
 const EMAIL = 'iusengclub@gmail.com';
 const TAKEN = []; // ids of spots already promised to a sponsor
@@ -215,15 +223,16 @@ const T = {
   en: {
     city: 'Sarajevo', stageTitle: 'The IEC shirt in 3D',
     title: 'Put your logo on the IEC shirt',
-    lede: 'Members of IEC Engineering Club earn this shirt by collecting 10 stamps at club events, so the people wearing it are the club\'s most active engineering students. Choose the spots you want, then send us the request below.',
+    lede: 'Members of IEC Engineering Club earn this shirt by collecting 10 stamps at club events, so the people wearing it are the club\'s most active engineering students. Choose the shirt and the spots you want, then send us the request below.',
     spotsTitle: 'Sponsor spots', count: n => `Selected: ${n}`, available: 'Available', taken: 'Taken',
+    design: 'Shirt', designs: { B: 'White', G: 'Black' },
     front: 'Front', back: 'Back', spin: 'Rotate', drag: 'Drag to turn the shirt. Tap a spot to choose it.',
     formTitle: 'Your request', company: 'Company', contact: 'Contact (email or phone)', note: 'Note (optional)', prepare: 'Prepare request',
     errSpot: 'Choose at least one spot.', errCompany: 'Enter your company name.',
     outTitle: 'Message to send', outHelp: 'Copy this message and send it to', copy: 'Copy message', copied: 'Copied', mail: 'Open in email app',
     fine: 'This page does not send anything on its own. Sizes are print sizes on an adult L shirt.',
     subject: 'IEC shirt sponsorship', hello: 'Hello IEC Engineering Club,', want: 'We would like to sponsor the IEC shirt.',
-    lCompany: 'Company', lSpots: 'Spots', lContact: 'Contact', lNote: 'Note', thanks: 'Thank you.',
+    lCompany: 'Company', lShirt: 'Shirt', lSpots: 'Spots', lContact: 'Contact', lNote: 'Note', thanks: 'Thank you.',
     spots: {
       front: ['Front chest, main sponsor', 'The largest spot, in the middle of the chest.'],
       chest: ['Right chest', 'A small spot across from the club logo.'],
@@ -236,15 +245,16 @@ const T = {
   tr: {
     city: 'Saraybosna', stageTitle: 'IEC tişörtü 3D',
     title: 'Logonuzu IEC tişörtüne koyun',
-    lede: 'IEC Engineering Club üyeleri bu tişörtü kulüp etkinliklerinde 10 damga toplayarak kazanır. Yani onu kulübün en aktif mühendislik öğrencileri giyer. İstediğiniz alanları seçin, sonra aşağıdan talebinizi bize gönderin.',
+    lede: 'IEC Engineering Club üyeleri bu tişörtü kulüp etkinliklerinde 10 damga toplayarak kazanır. Yani onu kulübün en aktif mühendislik öğrencileri giyer. Tişörtü ve istediğiniz alanları seçin, sonra aşağıdan talebinizi bize gönderin.',
     spotsTitle: 'Sponsor alanları', count: n => `Seçilen: ${n}`, available: 'Boş', taken: 'Dolu',
+    design: 'Tişört', designs: { B: 'Beyaz', G: 'Siyah' },
     front: 'Ön', back: 'Arka', spin: 'Döndür', drag: 'Tişörtü çevirmek için sürükleyin. Seçmek için bir alana dokunun.',
     formTitle: 'Talebiniz', company: 'Firma', contact: 'İletişim (e-posta ya da telefon)', note: 'Not (isteğe bağlı)', prepare: 'Talebi hazırla',
     errSpot: 'En az bir alan seçin.', errCompany: 'Firma adını yazın.',
     outTitle: 'Gönderilecek mesaj', outHelp: 'Bu mesajı kopyalayıp şu adrese gönderin:', copy: 'Mesajı kopyala', copied: 'Kopyalandı', mail: 'E-posta uygulamasında aç',
     fine: 'Bu sayfa kendi başına hiçbir şey göndermez. Ölçüler, yetişkin L beden tişörtteki baskı ölçüleridir.',
     subject: 'IEC tişört sponsorluğu', hello: 'Merhaba IEC Engineering Club,', want: 'IEC tişörtüne sponsor olmak istiyoruz.',
-    lCompany: 'Firma', lSpots: 'Alanlar', lContact: 'İletişim', lNote: 'Not', thanks: 'Teşekkürler.',
+    lCompany: 'Firma', lShirt: 'Tişört', lSpots: 'Alanlar', lContact: 'İletişim', lNote: 'Not', thanks: 'Teşekkürler.',
     spots: {
       front: ['Ön göğüs, ana sponsor', 'En büyük alan, göğsün ortasında.'],
       chest: ['Sağ göğüs', 'Kulüp logosunun karşısında küçük bir alan.'],
@@ -257,15 +267,16 @@ const T = {
   bs: {
     city: 'Sarajevo', stageTitle: 'IEC majica u 3D',
     title: 'Stavite svoj logo na IEC majicu',
-    lede: 'Članovi IEC Engineering Cluba ovu majicu osvajaju skupljanjem 10 pečata na događajima kluba, pa je nose najaktivniji studenti inženjerstva u klubu. Odaberite mjesta koja želite, a zatim nam pošaljite zahtjev ispod.',
+    lede: 'Članovi IEC Engineering Cluba ovu majicu osvajaju skupljanjem 10 pečata na događajima kluba, pa je nose najaktivniji studenti inženjerstva u klubu. Odaberite majicu i mjesta koja želite, a zatim nam pošaljite zahtjev ispod.',
     spotsTitle: 'Sponzorska mjesta', count: n => `Odabrano: ${n}`, available: 'Slobodno', taken: 'Zauzeto',
+    design: 'Majica', designs: { B: 'Bijela', G: 'Crna' },
     front: 'Naprijed', back: 'Leđa', spin: 'Okreći', drag: 'Povucite da okrenete majicu. Dodirnite mjesto da ga odaberete.',
     formTitle: 'Vaš zahtjev', company: 'Firma', contact: 'Kontakt (e-mail ili telefon)', note: 'Napomena (nije obavezno)', prepare: 'Pripremi zahtjev',
     errSpot: 'Odaberite barem jedno mjesto.', errCompany: 'Upišite naziv firme.',
     outTitle: 'Poruka za slanje', outHelp: 'Kopirajte ovu poruku i pošaljite je na', copy: 'Kopiraj poruku', copied: 'Kopirano', mail: 'Otvori u e-mail aplikaciji',
     fine: 'Ova stranica sama ništa ne šalje. Mjere su veličine printa na majici veličine L za odrasle.',
     subject: 'Sponzorstvo IEC majice', hello: 'Pozdrav IEC Engineering Club,', want: 'Željeli bismo sponzorisati IEC majicu.',
-    lCompany: 'Firma', lSpots: 'Mjesta', lContact: 'Kontakt', lNote: 'Napomena', thanks: 'Hvala.',
+    lCompany: 'Firma', lShirt: 'Majica', lSpots: 'Mjesta', lContact: 'Kontakt', lNote: 'Napomena', thanks: 'Hvala.',
     spots: {
       front: ['Prsa, glavni sponzor', 'Najveće mjesto, na sredini prsa.'],
       chest: ['Desna strana prsa', 'Malo mjesto nasuprot logotipu kluba.'],
@@ -294,10 +305,6 @@ function neckline(drop) {
 }
 const UNDERARM = []; for (let i = 0; i <= 12; i++) UNDERARM.push(bez2(P.C2, [P.A[0] + 0.4, P.A[1] + 0.6], P.A, i / 12));
 const HEM = []; for (let i = 0; i <= 40; i++) HEM.push(bez2(P.H, [0, 28.74], [-P.H[0], P.H[1]], i / 40));
-const RIGHT = [P.N, P.S, P.C1, ...UNDERARM, P.H];
-function outline(drop) { return [...neckline(drop), ...RIGHT.slice(1), ...HEM.slice(1, -1), ...mirror(RIGHT).reverse().slice(0, -1)]; }
-const SEAMS = [];
-for (const poly of [[P.N, P.S], [P.S, P.C1], UNDERARM, [P.A, P.H]]) for (const pl of [poly, mirror(poly)]) for (let i = 0; i < pl.length - 1; i++) SEAMS.push([pl[i], pl[i + 1]]);
 function segDist(px, py, a, b) {
   const vx = b[0] - a[0], vy = b[1] - a[1];
   const t = Math.max(0, Math.min(1, ((px - a[0]) * vx + (py - a[1]) * vy) / (vx * vx + vy * vy)));
@@ -321,17 +328,6 @@ function inside(x, y, poly) {
   }
   return c;
 }
-const FOLDS = [[[10.2, 9.9], [6.4, 12.6]], [[-10.2, 9.9], [-6.4, 12.6]], [[9.9, 15], [7.2, 19]], [[-9.9, 15.5], [-7.4, 19.5]]];
-// Height of the cloth above the seam plane: rounded at the seams, open at the neck, cuffs and hem.
-function height(x, y, back) {
-  let ds = 1e9; for (const [a, b] of SEAMS) ds = Math.min(ds, segDist(x, y, a, b));
-  const d = Math.min(ds / 6.2, 1);
-  let z = 4.1 * Math.sqrt(Math.max(0, 1 - (1 - d) * (1 - d)));
-  z += d * (back ? 0.35 * Math.exp(-((x / 6.5) ** 2 + ((y - 7) / 5) ** 2)) : 0.5 * Math.exp(-((x / 7) ** 2 + ((y - 8.5) / 6) ** 2)));
-  for (const [a, b] of FOLDS) z -= d * 0.16 * Math.exp(-((segDist(x, y, a, b) / 0.55) ** 2));
-  z += d * 0.05 * Math.sin(x * 1.1 + y * 0.35) * Math.sin(y * 0.8 - x * 0.25);
-  return z;
-}
 
 // ---------- spots (inches, same coordinates; back spots are as seen from behind)
 const SLEEVE = 2.95;
@@ -344,12 +340,19 @@ const SPOTS = [
   { id: 'lsleeve', side: 'front', sleeve: 1, cm: '7.5 × 7.5 cm', view: 0.8 },
   { id: 'rsleeve', side: 'front', sleeve: -1, cm: '7.5 × 7.5 cm', view: -0.8 },
 ];
-// The chosen shirt (option B): club seal on the left chest, the big IEC monogram on the back.
+// The two shirts sponsors choose from. B: white, club seal on the left chest, big IEC monogram on the back.
+// G: black, white seal on the left chest, IEC drawn as a 3D technical drawing on the back.
 // Each print is [image, x, y, width, height] in inches; back prints are placed as seen from behind.
-const SHIRT = { front: ['art/B_front_seal.png', 0.6, 3.0, 6.0, 5.9], back: ['art/B_back.png', -5.75, 6.1, 11.5, 9.5], fabric: '#f7f7f5', rib: 0xe9ecf0, inner: 0xd9dee5 };
+const DESIGNS = {
+  B: { front: ['art/B_front_seal.png', 0.6, 3.0, 6.0, 5.9], back: ['art/B_back.png', -5.75, 6.1, 11.5, 9.5], fabric: '#f7f7f5', rib: 0xe9ecf0, inner: 0xd9dee5, sheen: '#ffffff', exposure: 1.02, mock: 'mock/B2.jpg' },
+  G: { front: ['art/G_front.png', 1.7, 4.1, 3.8, 3.8], back: ['art/G_back.png', -6.0, 5.8, 12, 10], fabric: '#161616', rib: 0x1c1c1c, inner: 0x0f0f0f, sheen: '#5e5e5e', exposure: 0.85, mock: 'mock/G.jpg', dark: true },
+};
+const ORDER = ['B', 'G'];
 
 // ---------- state
-const state = { lang: 'en', selected: new Set(), hover: null };
+const state = { lang: 'en', design: 'B', selected: new Set(), hover: null };
+const askedShirt = (new URLSearchParams(location.search).get('shirt') || '').toUpperCase();
+if (DESIGNS[askedShirt]) state.design = askedShirt;
 try {
   const saved = localStorage.getItem('iec-sponsor-lang');
   state.lang = T[saved] ? saved : (/^tr/i.test(navigator.language) ? 'tr' : /^(bs|hr|sr)/i.test(navigator.language) ? 'bs' : 'en');
@@ -362,12 +365,25 @@ function renderText() {
   document.documentElement.lang = state.lang;
   for (const el of document.querySelectorAll('[data-t]')) { const v = tx()[el.dataset.t]; if (typeof v === 'string') el.textContent = v; }
   for (const b of document.querySelectorAll('#langs button')) b.setAttribute('aria-pressed', String(b.dataset.lang === state.lang));
+  $('designs').setAttribute('aria-label', tx().design);
   $('views').setAttribute('aria-label', tx().stageTitle);
   $('gl').setAttribute('aria-label', tx().stageTitle);
   $('fallback').alt = tx().stageTitle;
   $('addr').textContent = EMAIL;
-  renderSpots();
+  renderDesigns(); renderSpots();
   if (!$('out').hidden) buildMessage();
+}
+function renderDesigns() {
+  const box = $('designs'); box.textContent = '';
+  for (const k of ORDER) {
+    const b = document.createElement('button');
+    b.type = 'button'; b.setAttribute('aria-pressed', String(state.design === k));
+    const sw = document.createElement('span');
+    sw.className = 'swatch'; sw.style.background = DESIGNS[k].fabric; sw.setAttribute('aria-hidden', 'true');
+    b.append(sw, `${k} · ${tx().designs[k]}`);
+    b.addEventListener('click', () => setDesign(k));
+    box.appendChild(b);
+  }
 }
 function renderSpots() {
   const ul = $('spots'); ul.textContent = '';
@@ -405,7 +421,7 @@ function setHover(id) {
 }
 function buildMessage() {
   const t = tx(), spots = SPOTS.filter(s => state.selected.has(s.id)).map(s => `- ${t.spots[s.id][0]} (${s.cm})`);
-  const lines = [t.hello, '', t.want, '', `${t.lCompany}: ${$('company').value.trim()}`, `${t.lSpots}:`, ...spots];
+  const lines = [t.hello, '', t.want, '', `${t.lCompany}: ${$('company').value.trim()}`, `${t.lShirt}: ${state.design} · ${t.designs[state.design]}`, `${t.lSpots}:`, ...spots];
   if ($('contact').value.trim()) lines.push(`${t.lContact}: ${$('contact').value.trim()}`);
   if ($('note').value.trim()) lines.push(`${t.lNote}: ${$('note').value.trim()}`);
   lines.push('', t.thanks);
@@ -435,9 +451,25 @@ for (const b of document.querySelectorAll('#langs button')) b.addEventListener('
 const PPI = (Math.min(innerWidth, innerHeight) < 700 ? 48 : 72), TW = Math.round(35 * PPI), TH = Math.round(30 * PPI);
 const canvases = { front: document.createElement('canvas'), back: document.createElement('canvas') };
 for (const c of Object.values(canvases)) { c.width = TW; c.height = TH; }
-const images = {};
+const images = {}, loading = {};
 function loadImage(src) {
-  return new Promise(res => { const im = new Image(); im.onload = () => { images[src] = im; res(); }; im.onerror = res; im.src = src; });
+  if (!loading[src]) loading[src] = new Promise(res => { const im = new Image(); im.onload = () => { images[src] = im; res(); }; im.onerror = res; im.src = src; });
+  return loading[src];
+}
+function ensureDesign(k) { return Promise.all([loadImage(DESIGNS[k].front[0]), loadImage(DESIGNS[k].back[0])]); }
+const mats = { outer: [], inner: [], rib: [] };
+function setDesign(k) {
+  if (state.design === k) return;
+  const d = DESIGNS[k];
+  state.design = k; renderDesigns();
+  $('fallback').src = d.mock;
+  for (const m of mats.rib) { m.color.setHex(d.rib); m.sheenColor.set(d.sheen); }
+  for (const m of mats.outer) m.sheenColor.set(d.sheen);
+  for (const m of mats.inner) m.color.setHex(d.inner);
+  if (renderer) renderer.toneMappingExposure = d.exposure;
+  paintAll();
+  ensureDesign(k).then(() => { if (state.design === k) paintAll(); });
+  if (!$('out').hidden) buildMessage();
 }
 function roundRect(g, x, y, w, h, r) { g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); }
 function spotFrame(g, s) {
@@ -448,16 +480,22 @@ function spotFrame(g, s) {
   }
   g.translate(s.rect[0], s.rect[1]); return [s.rect[2], s.rect[3]];
 }
+// Spot colours on the white and on the black shirt.
+const SPOT_INK = {
+  light: { idle: 'rgba(233,241,250,0.93)', hot: '#dbe8f6', sel: '#154a7f', taken: '#d9dde3', line: '#154a7f', lineTaken: '#9aa5b1', text: '#154a7f', textTaken: '#6b7682' },
+  dark: { idle: 'rgba(255,255,255,0.1)', hot: 'rgba(255,255,255,0.2)', sel: '#2f6db0', taken: 'rgba(255,255,255,0.06)', line: '#ffffff', lineTaken: '#6b7682', text: '#ffffff', textTaken: '#8a96a3' },
+};
 function drawSpot(g, s) {
   const taken = TAKEN.includes(s.id), sel = state.selected.has(s.id), hot = state.hover === s.id;
+  const ink = SPOT_INK[DESIGNS[state.design].dark ? 'dark' : 'light'];
   g.save();
   const [w, h] = spotFrame(g, s);
   roundRect(g, 0, 0, w, h, 0.09);
-  g.fillStyle = taken ? '#d9dde3' : sel ? '#154a7f' : hot ? '#dbe8f6' : 'rgba(233,241,250,0.93)';
+  g.fillStyle = taken ? ink.taken : sel ? ink.sel : hot ? ink.hot : ink.idle;
   g.fill();
   g.lineWidth = sel || hot ? 0.08 : 0.055;
   g.setLineDash(sel || hot || taken ? [] : [0.24, 0.13]);
-  g.strokeStyle = hot && !sel ? '#d9a92a' : taken ? '#9aa5b1' : '#154a7f';
+  g.strokeStyle = hot && !sel ? '#d9a92a' : taken ? ink.lineTaken : sel ? ink.sel : ink.line;
   g.stroke();
   g.setLineDash([]);
   g.scale(1 / PPI, 1 / PPI);
@@ -467,7 +505,7 @@ function drawSpot(g, s) {
   const tw = g.measureText(word).width;
   if (tw > W * 0.8) { fs *= (W * 0.8) / tw; g.font = `700 ${fs}px "Space Grotesk"`; g.letterSpacing = `${fs * 0.16}px`; }
   const ms = Math.max(9, Math.min(H * 0.12, fs * 0.42));
-  g.fillStyle = sel ? '#ffffff' : taken ? '#6b7682' : '#154a7f';
+  g.fillStyle = sel ? '#ffffff' : taken ? ink.textTaken : ink.text;
   g.textAlign = 'center'; g.textBaseline = 'alphabetic';
   const gap = H * 0.08, block = fs * 0.72 + gap + ms * 0.72, top = (H - block) / 2;
   g.fillText(word, W / 2 + fs * 0.08, top + fs * 0.72);
@@ -475,106 +513,288 @@ function drawSpot(g, s) {
   g.fillText(sel ? '✓ ' + s.cm : s.cm, W / 2, top + fs * 0.72 + gap + ms * 0.72);
   g.restore();
 }
+// Twin-needle hems at the bottom and the cuffs, and the seam under the collar.
+function stitchLine(g, pts, color) {
+  g.save(); g.strokeStyle = color; g.lineWidth = 0.035; g.setLineDash([0.11, 0.06]); g.lineCap = 'round';
+  g.beginPath(); pts.forEach(([x, y], i) => (i ? g.lineTo(x, y) : g.moveTo(x, y))); g.stroke(); g.restore();
+}
+function stitches(g, side, d) {
+  const col = d.dark ? 'rgba(255,255,255,0.18)' : 'rgba(15,47,82,0.2)';
+  for (const off of [0.55, 0.78]) stitchLine(g, HEM.map(([x, y]) => [x, y - off]), col);
+  for (const sg of [1, -1]) for (const off of [0.5, 0.72]) stitchLine(g, [P.C1, P.C2].map(([x, y]) => [sg * (x - DIR[0] * off), y - DIR[1] * off]), col);
+  const neck = neckline(side === 'back' ? 0.9 : 3.3);
+  stitchLine(g, neck.map(([x, y], i) => {
+    const a = neck[Math.max(0, i - 1)], b = neck[Math.min(neck.length - 1, i + 1)], tx = b[0] - a[0], ty = b[1] - a[1], l = Math.hypot(tx, ty) || 1;
+    return [x - ty / l * 0.62, y + tx / l * 0.62];
+  }), col);
+}
 const textures = {};
 function paint(side) {
   const g = canvases[side].getContext('2d');
+  const d = DESIGNS[state.design];
   g.setTransform(1, 0, 0, 1, 0, 0);
-  g.fillStyle = SHIRT.fabric; g.fillRect(0, 0, TW, TH);
+  g.fillStyle = d.fabric; g.fillRect(0, 0, TW, TH);
   g.setTransform(PPI, 0, 0, PPI, 17.5 * PPI, 0.5 * PPI);
   g.imageSmoothingQuality = 'high';
-  const [src, x, y, w, h] = SHIRT[side];
+  const [src, x, y, w, h] = d[side];
   if (images[src]) g.drawImage(images[src], x, y, w, h);
+  stitches(g, side, d);
   for (const s of SPOTS) if (s.side === side) drawSpot(g, s);
   if (textures[side]) textures[side].needsUpdate = true;
 }
 function paintAll() { paint('front'); paint('back'); }
 
-// ---------- 3D
+// ---------- 3D: a ghost-mannequin T-shirt. The flat pattern is wrapped around an invisible body, so pattern
+// coordinates are also texture coordinates and every print keeps its real size on the fabric.
 const canvas = $('gl');
-let renderer, scene, camera, controls, meshes = [], anim = null;
-function buildPanel(back) {
-  const poly = outline(back ? 0.9 : 3.3);
-  const h = 0.2, x0 = -17.4, y0 = -0.4, nx = 174, ny = 147;
+let renderer, scene, camera, controls, anim = null;
+const meshes = [], cloth = [];
+const SUPER = 2.05;                // body cross-section: a superellipse, a touch fuller than an ellipse
+const DEPTH = [[0, 2.5], [1.7, 2.9], [5, 3.8], [9.6, 4.25], [18, 4.05], [28.6, 4.3]];   // half depth of the body (in) by height
+const ARM = 47 * Math.PI / 180;    // the sleeves hang 47 degrees below horizontal
+const SLEEVE_LEN = 6.4;
+const smooth = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
+function keyed(keys, x) {
+  if (x <= keys[0][0]) return keys[0][1];
+  for (let i = 1; i < keys.length; i++) if (x <= keys[i][0]) {
+    const [x0, y0] = keys[i - 1], [x1, y1] = keys[i];
+    return y0 + (y1 - y0) * (1 - Math.cos(Math.PI * (x - x0) / (x1 - x0))) / 2;
+  }
+  return keys[keys.length - 1][1];
+}
+// Flat half-width of the body at height py: shoulder line, then armhole, then side seam.
+function sideX(py) {
+  if (py <= P.S[1]) return P.N[0] + (P.S[0] - P.N[0]) * Math.max(0, py) / P.S[1];
+  if (py <= P.A[1]) return P.S[0] + (P.A[0] - P.S[0]) * (py - P.S[1]) / (P.A[1] - P.S[1]);
+  return P.A[0] + (P.H[0] - P.A[0]) * (py - P.A[1]) / (P.H[1] - P.A[1]);
+}
+const se = (a, b, t) => { const c = Math.cos(t), s = Math.sin(t); return [a * Math.sign(c) * Math.abs(c) ** (2 / SUPER), b * Math.sign(s) * Math.abs(s) ** (2 / SUPER)]; };
+const rings = new Map();
+// Body cross-section at height py. Its quarter perimeter equals the flat half-width, so the side seams land at the sides.
+function ring(py) {
+  const key = Math.round(py * 200);
+  if (rings.has(key)) return rings.get(key);
+  const Q = sideX(py), b = keyed(DEPTH, py);
+  const table = a => {
+    const tab = [0];
+    let prev = se(a, b, Math.PI / 2);
+    for (let i = 1; i <= 96; i++) { const p = se(a, b, Math.PI / 2 * (1 - i / 96)); tab.push(tab[i - 1] + Math.hypot(p[0] - prev[0], p[1] - prev[1])); prev = p; }
+    return tab;
+  };
+  let lo = 0.1, hi = 24;
+  for (let k = 0; k < 30; k++) { const mid = (lo + hi) / 2; if (table(mid)[96] < Q) lo = mid; else hi = mid; }
+  const r = { a: (lo + hi) / 2, b };
+  r.tab = table(r.a);
+  rings.set(key, r);
+  return r;
+}
+// A flat point (px across from the centre line, py down from the shoulder line) placed on the front of the body.
+function wrapTorso(px, py) {
+  const r = ring(py), L = Math.min(Math.abs(px), r.tab[96]);
+  let i = 0;
+  while (i < 95 && r.tab[i + 1] < L) i++;
+  const f = (L - r.tab[i]) / Math.max(1e-9, r.tab[i + 1] - r.tab[i]);
+  const [x, z] = se(r.a, r.b, Math.PI / 2 * (1 - (i + f) / 96));
+  return [Math.sign(px) * x, Y0 - py, z];
+}
+const uvOf = (px, py) => [(px + 17.5) / 35, 1 - (py + 0.5) / 30];
+// Front or back body panel: the flat outline without the sleeves, meshed on a grid and wrapped.
+function buildTorso(back, h) {
+  const poly = [...neckline(back ? 0.9 : 3.3), P.S, P.A, ...HEM, [-P.A[0], P.A[1]], [-P.S[0], P.S[1]]];
+  const x0 = -11, y0 = -0.4, nx = Math.ceil(22 / h), ny = Math.ceil(29.4 / h);
   const used = new Int32Array((nx + 1) * (ny + 1)).fill(-1), tris = [];
   const vx = k => x0 + (k % (nx + 1)) * h, vy = k => y0 + Math.floor(k / (nx + 1)) * h;
   for (let j = 0; j < ny; j++) for (let i = 0; i < nx; i++) {
     const a = j * (nx + 1) + i, b = a + 1, c = a + nx + 1, d = c + 1;
     for (const t of [[a, c, b], [b, c, d]]) {
-      if (inside((vx(t[0]) + vx(t[1]) + vx(t[2])) / 3, (vy(t[0]) + vy(t[1]) + vy(t[2])) / 3, poly)) { tris.push(t); for (const k of t) used[k] = 0; }
+      // keep cells that touch the outline too; their outside corners are pulled onto it, so the edges stay smooth
+      const cx = (vx(t[0]) + vx(t[1]) + vx(t[2])) / 3, cy = (vy(t[0]) + vy(t[1]) + vy(t[2])) / 3;
+      const touches = t.some(k => inside(vx(k), vy(k), poly)) && nearest(cx, cy, poly)[2] < h * 0.8;
+      if (inside(cx, cy, poly) || touches) { tris.push(t); for (const k of t) used[k] = 0; }
     }
   }
-  const pos = [], nor = [], uv = [], index = [];
+  const part = { kind: 'torso', pos: [], uv: [], flat: [], out: [], index: [] };
   let n = 0;
-  const e = 0.05, sign = back ? -1 : 1;
   for (let k = 0; k < used.length; k++) {
     if (used[k] < 0) continue;
     let x = vx(k), y = vy(k);
     const [nxp, nyp, dist] = nearest(x, y, poly);
     if (!inside(x, y, poly) || dist < h * 0.35) { x = nxp; y = nyp; }
-    const z = height(x, y, back);
-    const zx = (height(x + e, y, back) - height(x - e, y, back)) / (2 * e);
-    const zy = (height(x, y + e, back) - height(x, y - e, back)) / (2 * e);
-    const nv = new THREE.Vector3(-zx, zy, sign).normalize();
-    pos.push(x, Y0 - y, z * sign); nor.push(nv.x, nv.y, nv.z);
-    uv.push(back ? (17.5 - x) / 35 : (x + 17.5) / 35, 1 - (y + 0.5) / 30);
+    const [X, Y, Z] = wrapTorso(x, y), sx = back ? -X : X, sz = back ? -Z : Z;
+    part.pos.push(sx, Y, sz); part.out.push(sx, 0, sz);
+    part.uv.push(...uvOf(x, y)); part.flat.push(x, y, 0, 0);
     used[k] = n++;
   }
-  for (const t of tris) { const [a, b, c] = t.map(k => used[k]); if (back) index.push(a, c, b); else index.push(a, b, c); }
+  for (const t of tris) part.index.push(...t.map(k => used[k]));
+  return part;
+}
+// Half a sleeve (front or back): a tube whose rings turn from the upright armhole to the round cuff.
+function buildSleeve(sgn, back) {
+  const NU = 24, NF = 30, part = { kind: 'sleeve', pos: [], uv: [], flat: [], out: [], index: [] };
+  const Z = new THREE.Vector3(0, 0, 1), D3 = new THREE.Vector3(sgn * Math.cos(ARM), -Math.sin(ARM), 0.05).normalize();
+  const C0 = new THREE.Vector3(sgn * 8.15, Y0 - (P.S[1] + P.A[1]) / 2, 0);
+  const A0 = (P.A[1] - P.S[1]) / 2 + 0.15, B0 = 2.05, A1 = 2.5, B1 = 2.25;
+  const ps = back ? -sgn : sgn;   // the back pattern is seen from behind, so its x runs the other way
+  for (let i = 0; i <= NU; i++) {
+    const t = i / NU, e = t * t * (3 - 2 * t);
+    const n = new THREE.Vector3(sgn, 0, 0).lerp(D3, e).normalize();
+    const e1 = Z.clone().cross(n).multiplyScalar(sgn).normalize();
+    const c = C0.clone().addScaledVector(D3, SLEEVE_LEN * t);
+    const A = A0 + (A1 - A0) * e, B = B0 + (B1 - B0) * t;
+    const top = [P.S[0] + (P.C1[0] - P.S[0]) * t, P.S[1] + (P.C1[1] - P.S[1]) * t];
+    const bot = bez2(P.C2, [P.A[0] + 0.4, P.A[1] + 0.6], P.A, 1 - t);
+    for (let j = 0; j <= NF; j++) {
+      const g = j / NF, phi = Math.PI * g;   // 0 at the top seam, PI at the underarm seam
+      const p = c.clone().addScaledVector(e1, A * Math.cos(phi)).addScaledVector(Z, (back ? -B : B) * Math.sin(phi));
+      const px = ps * (top[0] + (bot[0] - top[0]) * g), py = top[1] + (bot[1] - top[1]) * g;
+      part.pos.push(p.x, p.y, p.z); part.out.push(p.x - c.x, p.y - c.y, p.z - c.z);
+      part.uv.push(...uvOf(px, py)); part.flat.push(px, py, t, g);
+    }
+  }
+  for (let i = 0; i < NU; i++) for (let j = 0; j < NF; j++) {
+    const a = i * (NF + 1) + j, b = a + 1, c = a + NF + 1, d = c + 1;
+    part.index.push(a, c, b, b, c, d);
+  }
+  return part;
+}
+// Folds pressed into the cloth, faded out at the seams so front and back still meet.
+const ARMPIT_FOLDS = [[[9.9, 10.6], [6.2, 13.6], 0.17], [[9.7, 12.6], [7.1, 16.4], 0.1], [[8.6, 3.2], [5.4, 5.8], 0.06]];
+function seamFade(part, px, py, g) { return part.kind === 'torso' ? smooth(0, 1.4, sideX(py) - Math.abs(px)) : smooth(0, 0.14, g) * smooth(0, 0.14, 1 - g); }
+function foldAt(part, px, py, t, g) {
+  if (part.kind === 'torso') {
+    const ax = Math.abs(px);
+    let d = 0.22 * smooth(14, 28.5, py) * Math.sin(px * 0.82 + 1.2) * (0.75 + 0.25 * Math.sin(px * 2.3 + 0.4));
+    for (const [a, b, depth] of ARMPIT_FOLDS) d -= depth * Math.exp(-((segDist(ax, py, a, b) / 0.6) ** 2));
+    return d + 0.035 * Math.sin(px * 1.7 + py * 0.9) * Math.sin(py * 0.6 - px * 0.4);
+  }
+  return -0.12 * Math.exp(-(((g - 0.8) / 0.2) ** 2)) * (0.6 + 0.4 * Math.sin(t * 19)) + 0.05 * Math.sin(t * 8 + g * 5);
+}
+function aoAt(part, px, py, t, g) {
+  if (part.kind === 'torso') return 1 - 0.3 * smooth(6.5, 10.2, Math.abs(px)) * Math.exp(-(((py - 10.5) / 3.2) ** 2)) - 0.06 * smooth(24, 28.5, py);
+  return 1 - 0.32 * Math.exp(-(((g - 1) / 0.32) ** 2)) * (1 - t) ** 1.4;
+}
+function orient(geo, out) {
+  const nm = geo.attributes.normal.array;
+  let s = 0;
+  for (let i = 0; i < out.length; i += 3) s += nm[i] * out[i] + nm[i + 1] * out[i + 1] + nm[i + 2] * out[i + 2];
+  if (s >= 0) return;
+  const idx = geo.index.array;
+  for (let i = 0; i < idx.length; i += 3) { const k = idx[i + 1]; idx[i + 1] = idx[i + 2]; idx[i + 2] = k; }
+  geo.index.needsUpdate = true;
+  geo.computeVertexNormals();
+}
+function makeCloth(part) {
   const geo = new THREE.BufferGeometry();
-  geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
-  geo.setAttribute('normal', new THREE.Float32BufferAttribute(nor, 3));
-  geo.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
-  geo.setIndex(index);
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(part.pos, 3));
+  geo.setAttribute('uv', new THREE.Float32BufferAttribute(part.uv, 2));
+  geo.setIndex(part.index);
+  geo.computeVertexNormals();
+  orient(geo, part.out);
+  const p = geo.attributes.position.array, nm = geo.attributes.normal.array, f = part.flat;
+  const count = f.length / 4, col = new Float32Array(count * 3), w = new Float32Array(count), fade = new Float32Array(count);
+  for (let i = 0; i < count; i++) {
+    const px = f[4 * i], py = f[4 * i + 1], t = f[4 * i + 2], g = f[4 * i + 3];
+    fade[i] = seamFade(part, px, py, g);
+    const d = foldAt(part, px, py, t, g) * fade[i];
+    for (let k = 0; k < 3; k++) p[3 * i + k] += nm[3 * i + k] * d;
+    col[3 * i] = col[3 * i + 1] = col[3 * i + 2] = aoAt(part, px, py, t, g) - Math.max(0, -d) * 0.6;
+    w[i] = part.kind === 'torso' ? smooth(2, 28.5, py) ** 1.25 : 0.05 + 0.6 * t ** 1.3;
+  }
+  geo.setAttribute('color', new THREE.Float32BufferAttribute(col, 3));
+  geo.computeVertexNormals();
+  geo.computeBoundingSphere();
+  geo.boundingSphere.radius += 1;
+  cloth.push({ geo, base: Float32Array.from(p), normal: Float32Array.from(geo.attributes.normal.array), w, fade, flat: f });
   return geo;
 }
-function rim(frontPts, backPts, radius, color) {
-  const pts = [...frontPts.map(([x, y]) => new THREE.Vector3(x, Y0 - y, height(x, y, false))), ...backPts.map(([x, y]) => new THREE.Vector3(x, Y0 - y, -height(x, y, true)))];
-  const geo = new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts, true, 'centripetal'), Math.max(60, pts.length * 3), radius, 10, true);
-  return new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ color, roughness: 0.95 }));
+// The cloth moves like a slow liquid: waves run down the shirt, and the hem swings when the shirt is turned.
+let swing = 0, swingV = 0, lastAz = null, lastOmega = 0, lastNow = null;
+function deform(time) {
+  for (const c of cloth) {
+    const p = c.geo.attributes.position.array, b = c.base, n = c.normal, f = c.flat;
+    for (let i = 0, k = 0; i < c.w.length; i++, k += 3) {
+      const w = c.w[i], px = f[4 * i], py = f[4 * i + 1];
+      const d = w * c.fade[i] * (0.2 * Math.sin(0.42 * py - 1.25 * time + 0.5 * px) + 0.09 * Math.sin(0.85 * px - 0.27 * py + 0.95 * time));
+      let x = b[k] + n[k] * d, z = b[k + 2] + n[k + 2] * d;
+      const beta = swing * w * w;
+      if (beta) { const cs = Math.cos(beta), sn = Math.sin(beta), xx = x * cs - z * sn; z = x * sn + z * cs; x = xx; }
+      p[k] = x; p[k + 1] = b[k + 1] + n[k + 1] * d; p[k + 2] = z;
+    }
+    c.geo.attributes.position.needsUpdate = true;
+    c.geo.computeVertexNormals();
+  }
 }
-function fabricNormalMap() {
-  const c = document.createElement('canvas'); c.width = c.height = 256;
-  const g = c.getContext('2d'), img = g.createImageData(256, 256);
-  for (let y = 0; y < 256; y++) for (let x = 0; x < 256; x++) {
-    const rib = Math.sin(x * Math.PI / 2) * 0.5 + (Math.random() - 0.5) * 0.6;
-    const i = (y * 256 + x) * 4;
-    img.data[i] = 128 + rib * 26; img.data[i + 1] = 128 + (Math.random() - 0.5) * 20; img.data[i + 2] = 255; img.data[i + 3] = 255;
+function collar(knit) {
+  const f = neckline(3.3).map(([x, y]) => { const [X, Y, Z] = wrapTorso(x, y); return new THREE.Vector3(X, Y, Z); });
+  const b = neckline(0.9).map(([x, y]) => { const [X, Y, Z] = wrapTorso(x, y); return new THREE.Vector3(-X, Y, -Z); });
+  const curve = new THREE.CatmullRomCurve3([...f, ...b.slice(1, -1)], true, 'centripetal');
+  const tex = knit.clone(); tex.repeat.set(260, 2); tex.needsUpdate = true;
+  const d = DESIGNS[state.design];
+  const mat = new THREE.MeshPhysicalMaterial({ color: d.rib, roughness: 0.95, envMapIntensity: 0.55, sheen: 1, sheenRoughness: 0.8, sheenColor: new THREE.Color(d.sheen), normalMap: tex, normalScale: new THREE.Vector2(0.6, 0.6) });
+  mats.rib.push(mat);
+  const m = new THREE.Mesh(new THREE.TubeGeometry(curve, 220, 0.22, 12, true), mat);
+  m.castShadow = m.receiveShadow = true;
+  return m;
+}
+// Jersey knit: columns of small V-shaped loops, as a normal map.
+function knitNormalMap() {
+  const N = 128, c = document.createElement('canvas'); c.width = c.height = N;
+  const g = c.getContext('2d'), img = g.createImageData(N, N), hgt = new Float32Array(N * N);
+  for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
+    const cx = (x % 8) - 3.5, row = (y + Math.abs(cx) * 1.1) % 8;
+    hgt[y * N + x] = Math.cos(cx / 4 * Math.PI / 2) * (0.6 + 0.4 * Math.sin(row / 8 * Math.PI * 2)) + (Math.random() - 0.5) * 0.25;
+  }
+  for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
+    const hx = hgt[y * N + (x + 1) % N] - hgt[y * N + (x - 1 + N) % N], hy = hgt[((y + 1) % N) * N + x] - hgt[((y - 1 + N) % N) * N + x];
+    const i = (y * N + x) * 4;
+    img.data[i] = 128 - hx * 60; img.data[i + 1] = 128 + hy * 60; img.data[i + 2] = 255; img.data[i + 3] = 255;
   }
   g.putImageData(img, 0, 0);
-  const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(70, 60);
+  const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(36, 31);
   return t;
 }
 function init3d() {
   renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = DESIGNS[state.design].exposure;
+  renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   scene = new THREE.Scene();
+  const pmrem = new THREE.PMREMGenerator(renderer);
+  scene.environment = pmrem.fromScene(new RoomEnvironment(renderer), 0.04).texture;
   camera = new THREE.PerspectiveCamera(28, 1, 1, 600);
-  scene.add(new THREE.HemisphereLight(0xffffff, 0xc4ceda, 1.9));
-  const key = new THREE.DirectionalLight(0xffffff, 1.45); key.position.set(-30, 40, 55); scene.add(key);
-  const rimL = new THREE.DirectionalLight(0xdfe9ff, 0.7); rimL.position.set(40, 10, -50); scene.add(rimL);
-  const fnm = fabricNormalMap();
+  scene.add(new THREE.HemisphereLight(0xffffff, 0xb9c3cf, 0.3));
+  const key = new THREE.DirectionalLight(0xffffff, 1.15); key.position.set(-20, 45, 40);
+  key.castShadow = true; key.shadow.mapSize.set(2048, 2048);
+  Object.assign(key.shadow.camera, { left: -22, right: 22, top: 24, bottom: -24, near: 10, far: 140 });
+  key.shadow.bias = -0.0004; key.shadow.normalBias = 0.04;
+  scene.add(key);
+  const rimL = new THREE.DirectionalLight(0xdfe9ff, 0.5); rimL.position.set(40, 12, -50); scene.add(rimL);
+  const knit = knitNormalMap(), d = DESIGNS[state.design], small = Math.min(innerWidth, innerHeight) < 700;
   for (const side of ['front', 'back']) {
     const tex = new THREE.CanvasTexture(canvases[side]);
     tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
     textures[side] = tex;
-    const geo = buildPanel(side === 'back');
-    const outer = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ map: tex, roughness: 0.93, normalMap: fnm, normalScale: new THREE.Vector2(0.18, 0.18), side: THREE.FrontSide }));
-    outer.userData.side = side; meshes.push(outer); scene.add(outer);
-    scene.add(new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ color: SHIRT.inner, roughness: 1, side: THREE.BackSide })));
+    const outer = new THREE.MeshPhysicalMaterial({ map: tex, vertexColors: true, roughness: 0.92, envMapIntensity: 0.55, sheen: 1, sheenRoughness: 0.75, sheenColor: new THREE.Color(d.sheen), normalMap: knit, normalScale: new THREE.Vector2(0.32, 0.32) });
+    const inner = new THREE.MeshStandardMaterial({ color: d.inner, vertexColors: true, roughness: 1, envMapIntensity: 0.4, side: THREE.BackSide, normalMap: knit, normalScale: new THREE.Vector2(0.3, 0.3) });
+    mats.outer.push(outer); mats.inner.push(inner);
+    const back = side === 'back';
+    for (const part of [buildTorso(back, small ? 0.42 : 0.3), buildSleeve(1, back), buildSleeve(-1, back)]) {
+      const geo = makeCloth(part);
+      const m = new THREE.Mesh(geo, outer);
+      m.castShadow = m.receiveShadow = true; m.userData.side = side;
+      meshes.push(m); scene.add(m);
+      const mi = new THREE.Mesh(geo, inner); mi.receiveShadow = true; scene.add(mi);
+    }
   }
-  const rib = SHIRT.rib;
-  scene.add(rim(neckline(3.3), neckline(0.9).reverse().slice(1, -1), 0.3, rib));
-  scene.add(rim(HEM, [...HEM].reverse().slice(1, -1), 0.11, rib));
-  const cuff = sg => { const a = [P.C1[0] * sg, P.C1[1]], b = [P.C2[0] * sg, P.C2[1]], line = []; for (let i = 0; i <= 16; i++) line.push([a[0] + (b[0] - a[0]) * i / 16, a[1] + (b[1] - a[1]) * i / 16]); return rim(line, [...line].reverse().slice(1, -1), 0.11, rib); };
-  scene.add(cuff(1), cuff(-1));
-  // soft floor shadow
+  scene.add(collar(knit));
+  // soft contact shadow under the hem
   const sc = document.createElement('canvas'); sc.width = sc.height = 128;
   const sg = sc.getContext('2d'), grd = sg.createRadialGradient(64, 64, 4, 64, 64, 64);
-  grd.addColorStop(0, 'rgba(15,47,82,0.28)'); grd.addColorStop(1, 'rgba(15,47,82,0)');
+  grd.addColorStop(0, 'rgba(15,47,82,0.26)'); grd.addColorStop(1, 'rgba(15,47,82,0)');
   sg.fillStyle = grd; sg.fillRect(0, 0, 128, 128);
   const shadow = new THREE.Mesh(new THREE.PlaneGeometry(34, 12), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(sc), transparent: true, depthWrite: false }));
-  shadow.rotation.x = -Math.PI / 2; shadow.position.y = Y0 - 31; scene.add(shadow);
+  shadow.rotation.x = -Math.PI / 2; shadow.position.y = Y0 - 30.95; scene.add(shadow);
 
   controls = new OrbitControls(camera, canvas);
   controls.target.set(0, Y0 - 13.5, 0);
@@ -583,6 +803,14 @@ function init3d() {
   controls.autoRotate = !reduceMotion; controls.autoRotateSpeed = 1.1;
   controls.addEventListener('start', () => { controls.autoRotate = false; anim = null; pressView(null); });
   camera.position.set(0, Y0 - 11, 80);
+  // ?view=back or ?view=<degrees> opens the shirt turned, for links straight to the back
+  const askedView = new URLSearchParams(location.search).get('view');
+  const viewDeg = askedView === 'back' ? 180 : parseFloat(askedView);
+  if (Number.isFinite(viewDeg)) {
+    const a = viewDeg * Math.PI / 180;
+    camera.position.set(80 * Math.sin(a), Y0 - 11, 80 * Math.cos(a));
+    controls.autoRotate = false;
+  }
   resize();
   new ResizeObserver(resize).observe(canvas);
   setupPicking();
@@ -613,6 +841,18 @@ function tick(now) {
     if (k >= 1) anim = null;
   }
   controls.update();
+  const dt = lastNow === null ? 1 / 60 : Math.min(0.05, Math.max(1e-3, (now - lastNow) / 1000));
+  lastNow = now;
+  const az = controls.getAzimuthalAngle();
+  let dAz = lastAz === null ? 0 : az - lastAz;
+  lastAz = az;
+  if (dAz > Math.PI) dAz -= 2 * Math.PI; else if (dAz < -Math.PI) dAz += 2 * Math.PI;
+  const omega = dAz / dt;
+  // the hem lags behind a turn and swings back: a damped spring kicked by changes in turning speed
+  swingV += (-30 * swing - 3.2 * swingV) * dt + (omega - lastOmega) * 0.35;
+  lastOmega = omega;
+  swing = Math.max(-0.35, Math.min(0.35, swing + swingV * dt));
+  if (!reduceMotion) deform(now / 1000);
   renderer.render(scene, camera);
 }
 function focusSpot(s) { if (!controls) return; viewTo(s.view); pressView(null); }
@@ -645,9 +885,9 @@ function setupPicking() {
     ndc.set(((ev.clientX - r.left) / r.width) * 2 - 1, -((ev.clientY - r.top) / r.height) * 2 + 1);
     ray.setFromCamera(ndc, camera);
     const hit = ray.intersectObjects(meshes, false)[0];
-    if (!hit) return null;
-    const side = hit.object.userData.side, x = side === 'back' ? -hit.point.x : hit.point.x, y = Y0 - hit.point.y;
-    return spotAt(side, x, y);
+    if (!hit || !hit.uv) return null;
+    // texture coordinates are flat-pattern coordinates, so a hit maps straight back to the print layout
+    return spotAt(hit.object.userData.side, hit.uv.x * 35 - 17.5, (1 - hit.uv.y) * 30 - 0.5);
   };
   canvas.addEventListener('pointerdown', ev => { down = [ev.clientX, ev.clientY]; });
   canvas.addEventListener('pointerup', ev => {
@@ -667,13 +907,14 @@ function setupPicking() {
 
 // ---------- start
 renderText();
-$('fallback').src = 'mock/B2.jpg';
+$('fallback').src = DESIGNS[state.design].mock;
 const fontsReady = Promise.all([document.fonts.load('700 40px "Space Grotesk"'), document.fonts.load('600 20px "JetBrains Mono"')]).catch(() => {});
 document.fonts.addEventListener('loadingdone', () => paintAll());
-Promise.all([loadImage(SHIRT.front[0]), loadImage(SHIRT.back[0]), fontsReady]).then(() => {
+Promise.all([ensureDesign(state.design), fontsReady]).then(() => {
   paintAll();
   try { init3d(); }
   catch (err) { canvas.hidden = true; $('fallback').hidden = false; $('views').hidden = true; }
+  for (const k of ORDER) ensureDesign(k);
 });
 </script>
 
