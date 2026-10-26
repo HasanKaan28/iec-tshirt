@@ -16,7 +16,7 @@ Bu tişört, IEC Pass kartında 10 damga toplayan üyelere verilir.
 | E | Çıkartmalar: birçok mühendislik alanından çıkartma | Açık mavi | Tüm tişört |
 | F | Formül duvarı: elektrik, inşaat, makine, bilgisayar, genetik, kimya, endüstri formülleri | Lacivert | Tüm tişört |
 | A | Kulüp mührü | Beyaz | Göğüs + sırt |
-| B | IEC monogram | Beyaz | Göğüs + sırt |
+| B | IEC monogram: önde ölçü çizgili kulüp mührü, arkada büyük IEC | Beyaz | Göğüs + sırt |
 | C | Teknik çizim | Beyaz | Göğüs + sırt |
 
 ![Seçenek D](mock/D.jpg)
