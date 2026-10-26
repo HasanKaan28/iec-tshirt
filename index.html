@@ -216,7 +216,9 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 
 const EMAIL = 'iusengclub@gmail.com';
-const TAKEN = []; // ids of spots already promised to a sponsor
+const TAKEN = ['chest']; // ids of spots already promised to a sponsor
+// Logos shown on taken spots: [on the white shirt, on the black shirt]. The right chest is Alma Ras.
+const SPONSOR_LOGOS = { chest: ['art/sponsor_almaras_dark.png', 'art/sponsor_almaras_light.png'] };
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 // ---------- words (tr, en, bs)
@@ -456,7 +458,10 @@ function loadImage(src) {
   if (!loading[src]) loading[src] = new Promise(res => { const im = new Image(); im.onload = () => { images[src] = im; res(); }; im.onerror = res; im.src = src; });
   return loading[src];
 }
-function ensureDesign(k) { return Promise.all([loadImage(DESIGNS[k].front[0]), loadImage(DESIGNS[k].back[0])]); }
+const logoSrc = (k, id) => SPONSOR_LOGOS[id][DESIGNS[k].dark ? 1 : 0];
+function ensureDesign(k) {
+  return Promise.all([loadImage(DESIGNS[k].front[0]), loadImage(DESIGNS[k].back[0]), ...Object.keys(SPONSOR_LOGOS).map(id => loadImage(logoSrc(k, id)))]);
+}
 const mats = { outer: [], inner: [], rib: [] };
 function setDesign(k) {
   if (state.design === k) return;
@@ -485,7 +490,18 @@ const SPOT_INK = {
   light: { idle: 'rgba(233,241,250,0.93)', hot: '#dbe8f6', sel: '#154a7f', taken: '#d9dde3', line: '#154a7f', lineTaken: '#9aa5b1', text: '#154a7f', textTaken: '#6b7682' },
   dark: { idle: 'rgba(255,255,255,0.1)', hot: 'rgba(255,255,255,0.2)', sel: '#2f6db0', taken: 'rgba(255,255,255,0.06)', line: '#ffffff', lineTaken: '#6b7682', text: '#ffffff', textTaken: '#8a96a3' },
 };
+// A sponsor's logo, fitted inside its spot.
+function drawLogo(g, s) {
+  const im = images[logoSrc(state.design, s.id)];
+  if (!im) return;
+  g.save();
+  const [w, h] = spotFrame(g, s);
+  const k = Math.min((w - 0.2) / im.width, (h - 0.2) / im.height);
+  g.drawImage(im, (w - im.width * k) / 2, (h - im.height * k) / 2, im.width * k, im.height * k);
+  g.restore();
+}
 function drawSpot(g, s) {
+  if (SPONSOR_LOGOS[s.id]) { drawLogo(g, s); return; }
   const taken = TAKEN.includes(s.id), sel = state.selected.has(s.id), hot = state.hover === s.id;
   const ink = SPOT_INK[DESIGNS[state.design].dark ? 'dark' : 'light'];
   g.save();
@@ -823,7 +839,7 @@ function setupPicking() {
   canvas.addEventListener('pointermove', ev => {
     if (ev.pointerType !== 'mouse' || ev.buttons) return;
     const s = pick(ev);
-    canvas.classList.toggle('pointing', !!s);
+    canvas.classList.toggle('pointing', !!s && !TAKEN.includes(s.id));
     setHover(s ? s.id : null);
   });
   canvas.addEventListener('pointerleave', () => { canvas.classList.remove('pointing'); setHover(null); });

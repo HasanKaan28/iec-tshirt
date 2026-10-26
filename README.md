@@ -34,8 +34,10 @@ Doğrudan bir tişörte link vermek için: `?shirt=G` (siyah) ya da `?shirt=B` (
 
 Sırtın üstünde, yakanın altında sponsor yoktur: oraya tişörtü giyen üyenin adı yazılır. Sayfa orada sayfanın dilinde örnek bir isim gösterir (AD SOYAD, NAME SURNAME, IME PREZIME).
 
-İki tişörtte de alanlar aynıdır. Satılan bir alanı sayfada "Dolu" göstermek için `index.html` içindeki `TAKEN` listesine alanın kimliğini ekleyin (`front`, `chest`, `lower`, `lsleeve`, `rsleeve`).
+Sağ göğüs Alma Ras'ındır: sayfada orada Alma Ras logosu görünür ve alan "Dolu" olarak gösterilir.
+
+İki tişörtte de alanlar aynıdır. Satılan bir alanı sayfada "Dolu" göstermek için `index.html` içindeki `TAKEN` listesine alanın kimliğini ekleyin (`front`, `chest`, `lower`, `lsleeve`, `rsleeve`). Sponsorun logosunun tişörtte görünmesi için `SPONSOR_LOGOS` listesine o alan için iki logo dosyası ekleyin: beyaz tişörte koyu, siyah tişörte açık renkli, şeffaf arka planlı PNG (`art/` klasöründe).
 
 ## English
 
-A 3D page for sponsors of the IEC Engineering Club shirt in Sarajevo. Sponsors pick the white shirt (B) or the black shirt (G), turn it, choose the spots for their logo and get a ready message to send to iusengclub@gmail.com. The flat pattern is wrapped around the body, so prints show at their real size. The page is available in Turkish, English and Bosnian.
+A 3D page for sponsors of the IEC Engineering Club shirt in Sarajevo. Sponsors pick the white shirt (B) or the black shirt (G), turn it, choose the spots for their logo and get a ready message to send to iusengclub@gmail.com. The flat pattern is wrapped around the body, so prints show at their real size. The right chest spot is taken by Alma Ras, whose logo the page shows there. The page is available in Turkish, English and Bosnian.
