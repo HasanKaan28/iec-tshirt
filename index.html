@@ -178,6 +178,7 @@ form { display: flex; flex-direction: column; gap: 12px; }
     <div class="section">
       <div class="section-head"><h2 data-t="spotsTitle"></h2><span class="count" id="count" aria-live="polite"></span></div>
       <ul class="spots" id="spots"></ul>
+      <p class="fine" data-t="nameNote"></p>
     </div>
 
     <div class="section">
@@ -225,6 +226,7 @@ const T = {
     title: 'Put your logo on the IEC shirt',
     lede: 'Members of IEC Engineering Club earn this shirt by collecting 10 stamps at club events, so the people wearing it are the club\'s most active engineering students. Choose the shirt and the spots you want, then send us the request below.',
     spotsTitle: 'Sponsor spots', count: n => `Selected: ${n}`, available: 'Available', taken: 'Taken',
+    nameNote: 'The upper back, under the collar, carries the name of the member who wears the shirt.', nameSample: 'NAME SURNAME',
     design: 'Shirt', designs: { B: 'White', G: 'Black' },
     front: 'Front', back: 'Back', spin: 'Rotate', drag: 'Drag to turn the shirt. Tap a spot to choose it.',
     formTitle: 'Your request', company: 'Company', contact: 'Contact (email or phone)', note: 'Note (optional)', prepare: 'Prepare request',
@@ -236,7 +238,6 @@ const T = {
     spots: {
       front: ['Front chest, main sponsor', 'The largest spot, in the middle of the chest.'],
       chest: ['Right chest', 'A small spot across from the club logo.'],
-      upper: ['Upper back', 'Just under the collar.'],
       lower: ['Lower back', 'Under the big back print.'],
       lsleeve: ['Left sleeve', 'Outer side of the left sleeve.'],
       rsleeve: ['Right sleeve', 'Outer side of the right sleeve.'],
@@ -247,6 +248,7 @@ const T = {
     title: 'Logonuzu IEC tişörtüne koyun',
     lede: 'IEC Engineering Club üyeleri bu tişörtü kulüp etkinliklerinde 10 damga toplayarak kazanır. Yani onu kulübün en aktif mühendislik öğrencileri giyer. Tişörtü ve istediğiniz alanları seçin, sonra aşağıdan talebinizi bize gönderin.',
     spotsTitle: 'Sponsor alanları', count: n => `Seçilen: ${n}`, available: 'Boş', taken: 'Dolu',
+    nameNote: 'Sırtın üstünde, yakanın altında tişörtü giyen üyenin adı yazar.', nameSample: 'AD SOYAD',
     design: 'Tişört', designs: { B: 'Beyaz', G: 'Siyah' },
     front: 'Ön', back: 'Arka', spin: 'Döndür', drag: 'Tişörtü çevirmek için sürükleyin. Seçmek için bir alana dokunun.',
     formTitle: 'Talebiniz', company: 'Firma', contact: 'İletişim (e-posta ya da telefon)', note: 'Not (isteğe bağlı)', prepare: 'Talebi hazırla',
@@ -258,7 +260,6 @@ const T = {
     spots: {
       front: ['Ön göğüs, ana sponsor', 'En büyük alan, göğsün ortasında.'],
       chest: ['Sağ göğüs', 'Kulüp logosunun karşısında küçük bir alan.'],
-      upper: ['Sırt üstü', 'Yakanın hemen altında.'],
       lower: ['Sırt altı', 'Büyük sırt baskısının altında.'],
       lsleeve: ['Sol kol', 'Sol kolun dış yüzü.'],
       rsleeve: ['Sağ kol', 'Sağ kolun dış yüzü.'],
@@ -269,6 +270,7 @@ const T = {
     title: 'Stavite svoj logo na IEC majicu',
     lede: 'Članovi IEC Engineering Cluba ovu majicu osvajaju skupljanjem 10 pečata na događajima kluba, pa je nose najaktivniji studenti inženjerstva u klubu. Odaberite majicu i mjesta koja želite, a zatim nam pošaljite zahtjev ispod.',
     spotsTitle: 'Sponzorska mjesta', count: n => `Odabrano: ${n}`, available: 'Slobodno', taken: 'Zauzeto',
+    nameNote: 'Na gornjem dijelu leđa, ispod kragne, piše ime člana koji nosi majicu.', nameSample: 'IME PREZIME',
     design: 'Majica', designs: { B: 'Bijela', G: 'Crna' },
     front: 'Naprijed', back: 'Leđa', spin: 'Okreći', drag: 'Povucite da okrenete majicu. Dodirnite mjesto da ga odaberete.',
     formTitle: 'Vaš zahtjev', company: 'Firma', contact: 'Kontakt (e-mail ili telefon)', note: 'Napomena (nije obavezno)', prepare: 'Pripremi zahtjev',
@@ -280,7 +282,6 @@ const T = {
     spots: {
       front: ['Prsa, glavni sponzor', 'Najveće mjesto, na sredini prsa.'],
       chest: ['Desna strana prsa', 'Malo mjesto nasuprot logotipu kluba.'],
-      upper: ['Gornji dio leđa', 'Odmah ispod kragne.'],
       lower: ['Donji dio leđa', 'Ispod velikog printa na leđima.'],
       lsleeve: ['Lijevi rukav', 'Vanjska strana lijevog rukava.'],
       rsleeve: ['Desni rukav', 'Vanjska strana desnog rukava.'],
@@ -335,7 +336,6 @@ const SLEEVE_C = [P.S[0] + (P.C1[0] - P.S[0]) * 0.55 + NRM[0] * 3.8, P.S[1] + (P
 const SPOTS = [
   { id: 'front', side: 'front', rect: [-5, 9.0, 10, 3.2], cm: '25 × 8 cm', view: 0 },
   { id: 'chest', side: 'front', rect: [-5.3, 5.2, 3.4, 1.4], cm: '8.5 × 3.5 cm', view: -0.25 },
-  { id: 'upper', side: 'back', rect: [-4, 2.2, 8, 1.8], cm: '20 × 4.5 cm', view: Math.PI },
   { id: 'lower', side: 'back', rect: [-4.5, 17.0, 9, 2.2], cm: '23 × 5.5 cm', view: Math.PI },
   { id: 'lsleeve', side: 'front', sleeve: 1, cm: '7.5 × 7.5 cm', view: 0.8 },
   { id: 'rsleeve', side: 'front', sleeve: -1, cm: '7.5 × 7.5 cm', view: -0.8 },
@@ -513,6 +513,20 @@ function drawSpot(g, s) {
   g.fillText(sel ? '✓ ' + s.cm : s.cm, W / 2, top + fs * 0.72 + gap + ms * 0.72);
   g.restore();
 }
+// The wearer's name across the upper back, under the collar (a sample name in the page language).
+function drawName(g, d) {
+  g.save();
+  g.scale(1 / PPI, 1 / PPI);
+  const word = tx().nameSample, maxW = 8 * PPI;
+  let fs = 1.25 * PPI;
+  g.font = `700 ${fs}px "Space Grotesk"`; g.letterSpacing = `${fs * 0.12}px`;
+  const tw = g.measureText(word).width;
+  if (tw > maxW) { fs *= maxW / tw; g.font = `700 ${fs}px "Space Grotesk"`; g.letterSpacing = `${fs * 0.12}px`; }
+  g.fillStyle = d.dark ? '#ffffff' : '#0f2f52';
+  g.textAlign = 'center'; g.textBaseline = 'alphabetic';
+  g.fillText(word, fs * 0.06, 3.55 * PPI);
+  g.restore();
+}
 // Twin-needle hems at the bottom and the cuffs, and the seam under the collar.
 function stitchLine(g, pts, color) {
   g.save(); g.strokeStyle = color; g.lineWidth = 0.035; g.setLineDash([0.11, 0.06]); g.lineCap = 'round';
@@ -539,6 +553,7 @@ function paint(side) {
   const [src, x, y, w, h] = d[side];
   if (images[src]) g.drawImage(images[src], x, y, w, h);
   stitches(g, side, d);
+  if (side === 'back') drawName(g, d);
   for (const s of SPOTS) if (s.side === side) drawSpot(g, s);
   if (textures[side]) textures[side].needsUpdate = true;
 }

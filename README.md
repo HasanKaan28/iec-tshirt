@@ -28,12 +28,13 @@ Doğrudan bir tişörte link vermek için: `?shirt=G` (siyah) ya da `?shirt=B` (
 | --- | --- |
 | Ön göğüs, ana sponsor | 25 × 8 cm |
 | Sağ göğüs | 8.5 × 3.5 cm |
-| Sırt üstü | 20 × 4.5 cm |
 | Sırt altı | 23 × 5.5 cm |
 | Sol kol | 7.5 × 7.5 cm |
 | Sağ kol | 7.5 × 7.5 cm |
 
-İki tişörtte de alanlar aynıdır. Satılan bir alanı sayfada "Dolu" göstermek için `index.html` içindeki `TAKEN` listesine alanın kimliğini ekleyin (`front`, `chest`, `upper`, `lower`, `lsleeve`, `rsleeve`).
+Sırtın üstünde, yakanın altında sponsor yoktur: oraya tişörtü giyen üyenin adı yazılır. Sayfa orada sayfanın dilinde örnek bir isim gösterir (AD SOYAD, NAME SURNAME, IME PREZIME).
+
+İki tişörtte de alanlar aynıdır. Satılan bir alanı sayfada "Dolu" göstermek için `index.html` içindeki `TAKEN` listesine alanın kimliğini ekleyin (`front`, `chest`, `lower`, `lsleeve`, `rsleeve`).
 
 ## English
 
