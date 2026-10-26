@@ -83,6 +83,7 @@ button, input, textarea { font: inherit; color: inherit; }
 .stage-top { position: absolute; top: 12px; left: 12px; right: 12px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 .stage-top .label { font: 600 11px/1 var(--mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
 .swatch { display: inline-block; width: 10px; height: 10px; margin-right: 7px; border-radius: 50%; border: 1px solid #9aa5b1; vertical-align: -1px; }
+.swatch.gift { border-color: var(--honey); box-shadow: 0 0 0 1.5px var(--honey); }
 .stage-bottom { position: absolute; left: 12px; right: 12px; bottom: 12px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
 .hint { font: 500 12px/1.3 var(--mono); color: var(--muted); }
 
@@ -227,7 +228,7 @@ const T = {
     title: 'Put your logo on the IEC shirt',
     lede: 'IEC Engineering Club members wear this shirt. Most buy it from the club, and the most active members win it by collecting 10 stamps at club events. Choose the spots you want, then send us the request below.',
     spotsTitle: 'Sponsor spots', count: n => `Selected: ${n}`, available: 'Available', taken: 'Taken',
-    design: 'Shirt', designs: { B: 'White', G: 'Black' },
+    design: 'Shirt', designs: { B: 'White', G: 'Black', P: 'Gift (10/10)' },
     front: 'Front', back: 'Back', spin: 'Rotate', drag: 'Drag to turn the shirt. Tap a spot to choose it.',
     formTitle: 'Your request', company: 'Company', contact: 'Contact (email or phone)', note: 'Note (optional)', prepare: 'Prepare request',
     errSpot: 'Choose at least one spot.', errCompany: 'Enter your company name.',
@@ -248,7 +249,7 @@ const T = {
     title: 'Logonuzu IEC tişörtüne koyun',
     lede: 'Bu tişörtü IEC Engineering Club üyeleri giyer. Üyelerin çoğu onu kulüpten satın alır, en aktif üyeler ise kulüp etkinliklerinde 10 damga toplayarak kazanır. İstediğiniz alanları seçin, sonra aşağıdan talebinizi bize gönderin.',
     spotsTitle: 'Sponsor alanları', count: n => `Seçilen: ${n}`, available: 'Boş', taken: 'Dolu',
-    design: 'Tişört', designs: { B: 'Beyaz', G: 'Siyah' },
+    design: 'Tişört', designs: { B: 'Beyaz', G: 'Siyah', P: 'Hediye (10/10)' },
     front: 'Ön', back: 'Arka', spin: 'Döndür', drag: 'Tişörtü çevirmek için sürükleyin. Seçmek için bir alana dokunun.',
     formTitle: 'Talebiniz', company: 'Firma', contact: 'İletişim (e-posta ya da telefon)', note: 'Not (isteğe bağlı)', prepare: 'Talebi hazırla',
     errSpot: 'En az bir alan seçin.', errCompany: 'Firma adını yazın.',
@@ -269,7 +270,7 @@ const T = {
     title: 'Stavite svoj logo na IEC majicu',
     lede: 'Ovu majicu nose članovi IEC Engineering Cluba. Većina članova je kupi od kluba, a najaktivniji je osvoje skupljanjem 10 pečata na događajima kluba. Odaberite mjesta koja želite, a zatim nam pošaljite zahtjev ispod.',
     spotsTitle: 'Sponzorska mjesta', count: n => `Odabrano: ${n}`, available: 'Slobodno', taken: 'Zauzeto',
-    design: 'Majica', designs: { B: 'Bijela', G: 'Crna' },
+    design: 'Majica', designs: { B: 'Bijela', G: 'Crna', P: 'Poklon (10/10)' },
     front: 'Naprijed', back: 'Leđa', spin: 'Okreći', drag: 'Povucite da okrenete majicu. Dodirnite mjesto da ga odaberete.',
     formTitle: 'Vaš zahtjev', company: 'Firma', contact: 'Kontakt (e-mail ili telefon)', note: 'Napomena (nije obavezno)', prepare: 'Pripremi zahtjev',
     errSpot: 'Odaberite barem jedno mjesto.', errCompany: 'Upišite naziv firme.',
@@ -346,8 +347,12 @@ const DESIGNS = {
   B: { front: ['art/B_front_seal.png', 0.6, 3.0, 6.0, 5.9], back: ['art/B_back.png', -5.75, 6.1, 11.5, 9.5], nape: ['art/NAPE_B.png', -1.53, 2.45, 3.06, 1.2], fabric: '#f7f7f5', rib: 0xe9ecf0, inner: 0xd9dee5, sheen: '#ffffff', exposure: 0.86, mock: 'mock/B2.jpg' },
   G: { front: ['art/G_front.png', 1.7, 4.1, 3.8, 3.8], back: ['art/G_back.png', -6.0, 5.8, 12, 10], nape: ['art/NAPE_G.png', -1.53, 2.45, 3.06, 1.2], fabric: '#161616', rib: 0x1c1c1c, inner: 0x0f0f0f, sheen: '#5e5e5e', exposure: 1.0, mock: 'mock/G.jpg', dark: true },
 };
-// The shirts sponsors are shown. Since 2026-10-26 the club makes only the black shirt; B stays defined for reference.
-const ORDER = ['G'];
+// P: the gift shirt, the black shirt that the 10 members who fill their IEC Pass get, with the round IEC PASS stamp
+// beside the IUS print under the collar.
+DESIGNS.P = { ...DESIGNS.G, stamp: ['art/PASS_G.png', 1.83, 2.2, 1.7, 1.7], mock: 'mock/G_pass.jpg' };
+// The shirts sponsors are shown. Since 2026-10-26 the club makes only the black shirt and its gift version;
+// B stays defined for reference.
+const ORDER = ['G', 'P'];
 
 // ---------- state
 const state = { lang: 'en', design: ORDER[0], selected: new Set(), hover: null };
@@ -379,8 +384,8 @@ function renderDesigns() {
     const b = document.createElement('button');
     b.type = 'button'; b.setAttribute('aria-pressed', String(state.design === k));
     const sw = document.createElement('span');
-    sw.className = 'swatch'; sw.style.background = DESIGNS[k].fabric; sw.setAttribute('aria-hidden', 'true');
-    b.append(sw, `${k} · ${tx().designs[k]}`);
+    sw.className = 'swatch' + (DESIGNS[k].stamp ? ' gift' : ''); sw.style.background = DESIGNS[k].fabric; sw.setAttribute('aria-hidden', 'true');
+    b.append(sw, tx().designs[k]);
     b.addEventListener('click', () => setDesign(k));
     box.appendChild(b);
   }
@@ -422,7 +427,7 @@ function setHover(id) {
 }
 function buildMessage() {
   const t = tx(), spots = SPOTS.filter(s => state.selected.has(s.id)).map(s => `- ${t.spots[s.id][0]} (${s.cm})`);
-  const lines = [t.hello, '', t.want, '', `${t.lCompany}: ${$('company').value.trim()}`, `${t.lShirt}: ${state.design} · ${t.designs[state.design]}`, `${t.lSpots}:`, ...spots];
+  const lines = [t.hello, '', t.want, '', `${t.lCompany}: ${$('company').value.trim()}`, `${t.lShirt}: ${t.designs[state.design]}`, `${t.lSpots}:`, ...spots];
   if ($('contact').value.trim()) lines.push(`${t.lContact}: ${$('contact').value.trim()}`);
   if ($('note').value.trim()) lines.push(`${t.lNote}: ${$('note').value.trim()}`);
   lines.push('', t.thanks);
@@ -460,7 +465,8 @@ function loadImage(src) {
 const logoSrc = (k, id) => SPONSOR_LOGOS[id][DESIGNS[k].dark ? 1 : 0];
 function ensureDesign(k) {
   const d = DESIGNS[k];
-  return Promise.all([loadImage(d.front[0]), loadImage(d.back[0]), loadImage(d.nape[0]), ...Object.keys(SPONSOR_LOGOS).map(id => loadImage(logoSrc(k, id)))]);
+  return Promise.all([loadImage(d.front[0]), loadImage(d.back[0]), loadImage(d.nape[0]), ...(d.stamp ? [loadImage(d.stamp[0])] : []),
+    ...Object.keys(SPONSOR_LOGOS).map(id => loadImage(logoSrc(k, id)))]);
 }
 const mats = { outer: [], inner: [], rib: [] };
 function setDesign(k) {
@@ -474,6 +480,7 @@ function setDesign(k) {
   if (renderer) renderer.toneMappingExposure = d.exposure;
   paintAll();
   ensureDesign(k).then(() => { if (state.design === k) paintAll(); });
+  if (d.stamp && controls) { viewTo(Math.PI); pressView('back'); } // the gift's stamp sits on the back
   if (!$('out').hidden) buildMessage();
 }
 function roundRect(g, x, y, w, h, r) { g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); }
@@ -555,6 +562,7 @@ function paint(side) {
   const [src, x, y, w, h] = d[side];
   if (images[src]) g.drawImage(images[src], x, y, w, h);
   if (side === 'back' && images[d.nape[0]]) g.drawImage(images[d.nape[0]], ...d.nape.slice(1));
+  if (side === 'back' && d.stamp && images[d.stamp[0]]) g.drawImage(images[d.stamp[0]], ...d.stamp.slice(1));
   stitches(g, side, d);
   for (const s of SPOTS) if (s.side === side) drawSpot(g, s);
   if (textures[side]) textures[side].needsUpdate = true;

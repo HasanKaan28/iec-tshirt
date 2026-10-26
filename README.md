@@ -14,7 +14,7 @@ Kulüp yalnızca siyah tişörtü (G) yapıyor (26 Ekim 2026 kararı). Önünde,
 
 ![Tişört G](mock/G.jpg)
 
-Beyaz tişört (B) kodda duruyor ama sayfada gösterilmiyor. Geri açmak için `index.html` içindeki `ORDER` listesine `'B'` ekleyin. Tişörtü arkadan açmak için linke `?view=back` ekleyin.
+Sayfada iki seçenek var: siyah tişört ve hediye tişörtü (10/10). Hediye tişörtü, IEC Pass'te 10 damgayı dolduran 10 üyeye verilen siyah tişörttür; yakanın altında IUS baskısının yanında yuvarlak bir IEC PASS damgası vardır. Doğrudan açmak için `?shirt=P` kullanın. Beyaz tişört (B) kodda duruyor ama gösterilmiyor; geri açmak için `index.html` içindeki `ORDER` listesine `'B'` ekleyin. Tişörtü arkadan açmak için linke `?view=back` ekleyin.
 
 3D tişört bir kumaş simülasyonundan gelir: ön ve arka kalıp dikiş yerlerinden birleştirilir ve görünmez bir mankenin üzerinde yerçekimiyle oturtulur. Kıvrımlar bu yüzden kendiliğinden oluşur. Her nokta kalıptaki yerini bildiği için baskılar kumaş üstünde gerçek ölçüleriyle görünür. Simülasyonun sonucu `garment.json` dosyasındadır.
 
@@ -36,4 +36,4 @@ Sağ göğüs Alma Ras'ındır: sayfada orada Alma Ras logosu görünür ve alan
 
 ## English
 
-A 3D page for sponsors of the IEC Engineering Club shirt in Sarajevo. Members buy the shirt from the club, and 10 shirts go as prizes to members who collect 10 stamps on their IEC Pass. Sponsors turn the black club shirt, choose the spots for their logo and get a ready message to send to iusengclub@gmail.com. The flat pattern is wrapped around the body, so prints show at their real size. The right chest spot is taken by Alma Ras, whose logo the page shows there. The page is available in Turkish, English and Bosnian.
+A 3D page for sponsors of the IEC Engineering Club shirt in Sarajevo. Members buy the shirt from the club, and 10 shirts go as prizes to members who collect 10 stamps on their IEC Pass. Sponsors turn the black club shirt (or its gift version for members who fill their IEC Pass), choose the spots for their logo and get a ready message to send to iusengclub@gmail.com. The flat pattern is wrapped around the body, so prints show at their real size. The right chest spot is taken by Alma Ras, whose logo the page shows there. The page is available in Turkish, English and Bosnian.
