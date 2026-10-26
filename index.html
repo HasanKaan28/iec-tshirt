@@ -1,0 +1,730 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>:root{color-scheme:light;padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui}img{max-width:100%}[hidden]{display:none!important}</style>
+<meta name="description" content="Choose where your logo goes on the IEC Engineering Club shirt. Turn the 3D shirt, pick sponsor spots and send the club your request.">
+<meta property="og:title" content="IEC Shirt Sponsorship">
+<meta property="og:description" content="Turn the 3D IEC Engineering Club shirt and pick the spot for your logo.">
+<meta property="og:image" content="https://hasankaan28.github.io/iec-tshirt/mock/D.jpg">
+<meta property="og:type" content="website">
+<title>IEC Shirt Sponsorship</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600;700&family=Space+Grotesk:wght@500;700&display=swap">
+<style>
+/* Layout: one-screen tool. The shirt turns on a drafting-table stage at the left; the sponsor spots and the request form sit in a panel on the right, stacked under the stage on phones. */
+:root {
+  --bg: #e8edf4;
+  --stage: #dde5ef;
+  --stage-grid: rgba(21, 74, 127, 0.07);
+  --panel: #ffffff;
+  --fg: #0f2f52;
+  --muted: #4f627a;
+  --line: #d3dce7;
+  --accent: #154a7f;
+  --accent-fg: #ffffff;
+  --accent-soft: #e6eef8;
+  --honey: #c8961c;
+  --ok: #2f7a4a;
+  --ok-soft: #e2f0e7;
+  --warn: #9a3b2e;
+  --display: 'Space Grotesk', 'Segoe UI', system-ui, sans-serif;
+  --body: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0a1626; --stage: #0f2034; --stage-grid: rgba(141, 179, 220, 0.07); --panel: #102440; --fg: #e7eef7; --muted: #a3b4c8; --line: #233a59;
+    --accent: #8db3dc; --accent-fg: #0a1626; --accent-soft: #17314f; --honey: #ecc246; --ok: #7cc293; --ok-soft: #16301f; --warn: #f0a596; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0a1626; --stage: #0f2034; --stage-grid: rgba(141, 179, 220, 0.07); --panel: #102440; --fg: #e7eef7; --muted: #a3b4c8; --line: #233a59;
+  --accent: #8db3dc; --accent-fg: #0a1626; --accent-soft: #17314f; --honey: #ecc246; --ok: #7cc293; --ok-soft: #16301f; --warn: #f0a596; color-scheme: dark;
+}
+html, body { height: 100%; }
+body { background: var(--bg); color: var(--fg); font: 15px/1.5 var(--body); }
+* { box-sizing: border-box; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+button, input, textarea { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--honey); outline-offset: 2px; }
+
+.app {
+  height: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 400px;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 12px 16px;
+  padding-block: 12px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.bar { grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.mark { font: 700 20px/1 var(--display); letter-spacing: 0.02em; padding: 6px 9px; border: 2px solid var(--fg); border-radius: 4px; }
+.brand-name { font: 600 12px/1.3 var(--mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--panel); }
+.seg button { border: 0; background: transparent; padding: 7px 12px; cursor: pointer; font: 600 12px/1 var(--mono); letter-spacing: 0.08em; color: var(--muted); }
+.seg button + button { border-left: 1px solid var(--line); }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-fg); }
+
+.stage {
+  position: relative; min-height: 0; border-radius: 14px; overflow: hidden;
+  background:
+    linear-gradient(var(--stage-grid) 1px, transparent 1px) 0 0 / 28px 28px,
+    linear-gradient(90deg, var(--stage-grid) 1px, transparent 1px) 0 0 / 28px 28px,
+    radial-gradient(120% 90% at 50% 40%, var(--panel) 0%, var(--stage) 70%);
+}
+#gl { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; cursor: grab; }
+#gl.pointing { cursor: pointer; }
+#fallback { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; padding: 56px 12px; }
+.stage-top { position: absolute; top: 12px; left: 12px; right: 12px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.stage-top .label { font: 600 11px/1 var(--mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chips button { border: 1px solid var(--line); background: var(--panel); border-radius: 999px; padding: 7px 11px; font: 600 12px/1 var(--mono); letter-spacing: 0.04em; color: var(--muted); cursor: pointer; }
+.chips button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-fg); }
+.stage-bottom { position: absolute; left: 12px; right: 12px; bottom: 12px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
+.hint { font: 500 12px/1.3 var(--mono); color: var(--muted); }
+
+.panel { min-height: 0; overflow-y: auto; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 22px 20px 26px; display: flex; flex-direction: column; gap: 18px; }
+.panel h1 { margin: 0; font: 700 26px/1.12 var(--display); text-wrap: balance; letter-spacing: -0.01em; }
+.panel h2 { margin: 0; font: 600 12px/1 var(--mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+.lede { margin: 0; color: var(--muted); max-width: 62ch; }
+.section { display: flex; flex-direction: column; gap: 10px; }
+.section-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.count { font: 600 12px/1 var(--mono); color: var(--accent); font-variant-numeric: tabular-nums; }
+
+.spots { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.spot { position: relative; }
+.spot input { position: absolute; opacity: 0; pointer-events: none; }
+.spot label {
+  display: grid; grid-template-columns: 22px minmax(0, 1fr) auto; gap: 4px 10px; align-items: start;
+  padding: 11px 12px; border: 1px solid var(--line); border-radius: 10px; cursor: pointer; transition: border-color .15s, background-color .15s;
+}
+.spot label:hover, .spot.hot label { border-color: var(--honey); }
+.spot input:focus-visible + label { outline: 2px solid var(--honey); outline-offset: 2px; }
+.spot input:checked + label { border-color: var(--accent); background: var(--accent-soft); }
+.box { width: 18px; height: 18px; margin-top: 2px; border: 2px solid var(--muted); border-radius: 4px; display: grid; place-items: center; }
+.spot input:checked + label .box { background: var(--accent); border-color: var(--accent); }
+.spot input:checked + label .box::after { content: ""; width: 5px; height: 9px; border: solid var(--accent-fg); border-width: 0 2px 2px 0; transform: translateY(-1px) rotate(45deg); }
+.spot-name { font: 600 15px/1.25 var(--display); }
+.spot-desc { grid-column: 2; font-size: 13px; color: var(--muted); }
+.spot-size { font: 600 12px/1.3 var(--mono); color: var(--fg); white-space: nowrap; text-align: right; }
+.chip { grid-column: 3; justify-self: end; font: 600 10px/1 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; padding: 4px 6px; border-radius: 4px; color: var(--ok); background: var(--ok-soft); }
+.spot.taken label { cursor: not-allowed; opacity: 0.6; }
+.spot.taken .chip { color: var(--muted); background: var(--accent-soft); }
+
+form { display: flex; flex-direction: column; gap: 12px; }
+.field { display: flex; flex-direction: column; gap: 5px; }
+.field label { font-size: 13px; font-weight: 600; }
+.field input, .field textarea, .out textarea { width: 100%; padding: 9px 11px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); }
+.field textarea { min-height: 70px; resize: vertical; }
+.err { margin: 0; color: var(--warn); font-size: 13px; font-weight: 600; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 14px; border-radius: 8px; border: 1px solid var(--accent); background: var(--accent); color: var(--accent-fg); font: 600 14px/1.2 var(--display); cursor: pointer; text-decoration: none; }
+.btn.ghost { background: transparent; color: var(--accent); }
+.btn.small { padding: 7px 10px; font-size: 12px; }
+.view { border: 1px solid var(--line); background: var(--panel); color: var(--fg); border-radius: 8px; padding: 7px 11px; font: 600 12px/1 var(--mono); letter-spacing: 0.06em; cursor: pointer; }
+.view[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); }
+.views { display: flex; gap: 6px; flex-wrap: wrap; }
+
+.out { display: flex; flex-direction: column; gap: 10px; padding: 14px; border: 1px dashed var(--accent); border-radius: 10px; }
+.out textarea { min-height: 190px; font: 500 12.5px/1.5 var(--mono); resize: vertical; }
+.out p { margin: 0; font-size: 13px; color: var(--muted); }
+.addr { font: 600 14px/1.3 var(--mono); color: var(--fg); user-select: all; word-break: break-all; }
+.row { display: flex; flex-wrap: wrap; gap: 8px; }
+.fine { margin: 0; font-size: 12px; color: var(--muted); }
+.fine a { color: var(--accent); }
+
+@media (max-width: 860px) {
+  .app { height: auto; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto auto; }
+  .stage { height: 64svh; min-height: 380px; }
+  .panel { overflow: visible; }
+}
+@media (prefers-reduced-motion: reduce) { .spot label { transition: none; } }
+</style>
+
+</head>
+<body>
+<div class="app">
+  <header class="bar">
+    <div class="brand"><span class="mark" aria-hidden="true">IEC</span><span class="brand-name" data-t="club"></span></div>
+    <div class="seg" role="group" aria-label="Language" id="langs">
+      <button type="button" data-lang="tr">TR</button><button type="button" data-lang="en">EN</button><button type="button" data-lang="bs">BS</button>
+    </div>
+  </header>
+
+  <section class="stage" aria-labelledby="stageTitle">
+    <h2 id="stageTitle" class="sr-only" data-t="stageTitle"></h2>
+    <canvas id="gl"></canvas>
+    <img id="fallback" hidden alt="">
+    <div class="stage-top">
+      <span class="label" data-t="design"></span>
+      <div class="chips" role="group" id="designs"></div>
+    </div>
+    <div class="stage-bottom">
+      <div class="views" role="group" id="views">
+        <button type="button" class="view" data-view="front" data-t="front"></button>
+        <button type="button" class="view" data-view="back" data-t="back"></button>
+        <button type="button" class="view" data-view="spin" data-t="spin"></button>
+      </div>
+      <span class="hint" data-t="drag"></span>
+    </div>
+  </section>
+
+  <aside class="panel">
+    <h1 data-t="title"></h1>
+    <p class="lede" data-t="lede"></p>
+
+    <div class="section">
+      <div class="section-head"><h2 data-t="spotsTitle"></h2><span class="count" id="count" aria-live="polite"></span></div>
+      <ul class="spots" id="spots"></ul>
+    </div>
+
+    <div class="section">
+      <h2 data-t="formTitle"></h2>
+      <form id="req" novalidate>
+        <div class="field"><label for="company" data-t="company"></label><input id="company" name="company" autocomplete="organization" required></div>
+        <div class="field"><label for="contact" data-t="contact"></label><input id="contact" name="contact" autocomplete="email"></div>
+        <div class="field"><label for="note" data-t="note"></label><textarea id="note" name="note"></textarea></div>
+        <p class="err" id="err" hidden></p>
+        <button class="btn" type="submit" data-t="prepare"></button>
+      </form>
+    </div>
+
+    <div class="out" id="out" hidden>
+      <h2 data-t="outTitle"></h2>
+      <label class="sr-only" for="msg" data-t="outTitle"></label>
+      <textarea id="msg" readonly></textarea>
+      <p><span data-t="outHelp"></span> <span class="addr" id="addr"></span></p>
+      <div class="row">
+        <button class="btn small" type="button" id="copy" data-t="copy"></button>
+        <a class="btn small ghost" id="mail" href="#" data-t="mail"></a>
+      </div>
+    </div>
+
+    <p class="fine"><span data-t="fine"></span> <a href="https://iusengclub.vercel.app" target="_blank" rel="noopener">iusengclub.vercel.app</a></p>
+  </aside>
+</div>
+
+<script type="importmap">
+{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/" } }
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+const EMAIL = 'iusengclub@gmail.com';
+const TAKEN = []; // ids of spots already promised to a sponsor
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// ---------- words (tr, en, bs)
+const T = {
+  en: {
+    club: 'Engineering Club, Sarajevo', stageTitle: 'The IEC shirt in 3D',
+    title: 'Put your logo on the IEC shirt',
+    lede: 'Members of IEC Engineering Club earn this shirt by collecting 10 stamps at club events, so the people wearing it are the club\'s most active engineering students. Choose the spots you want, then send us the request below.',
+    spotsTitle: 'Sponsor spots', count: n => `Selected: ${n}`, available: 'Available', taken: 'Taken',
+    design: 'Shirt design', designs: { A: 'Seal', B: 'Monogram', C: 'Drawing', D: 'Notebook', E: 'Stickers', F: 'Equations' },
+    front: 'Front', back: 'Back', spin: 'Rotate', drag: 'Drag to turn the shirt. Tap a spot to choose it.',
+    formTitle: 'Your request', company: 'Company', contact: 'Contact (email or phone)', note: 'Note (optional)', prepare: 'Prepare request',
+    errSpot: 'Choose at least one spot.', errCompany: 'Enter your company name.',
+    outTitle: 'Message to send', outHelp: 'Copy this message and send it to', copy: 'Copy message', copied: 'Copied', mail: 'Open in email app',
+    fine: 'This page does not send anything on its own. Sizes are print sizes on an adult L shirt.',
+    subject: 'IEC shirt sponsorship', hello: 'Hello IEC Engineering Club,', want: 'We would like to sponsor the IEC shirt.',
+    lCompany: 'Company', lSpots: 'Spots', lContact: 'Contact', lNote: 'Note', lDesign: 'Shirt design we looked at', thanks: 'Thank you.',
+    spots: {
+      front: ['Front chest, main sponsor', 'The largest spot, in the middle of the chest.'],
+      chest: ['Right chest', 'A small spot across from the club logo.'],
+      upper: ['Upper back', 'Just under the collar.'],
+      lower: ['Lower back', 'Under the big back print.'],
+      lsleeve: ['Left sleeve', 'Outer side of the left sleeve.'],
+      rsleeve: ['Right sleeve', 'Outer side of the right sleeve.'],
+    },
+  },
+  tr: {
+    club: 'Engineering Club, Saraybosna', stageTitle: 'IEC tişörtü 3D',
+    title: 'Logonuzu IEC tişörtüne koyun',
+    lede: 'IEC Engineering Club üyeleri bu tişörtü kulüp etkinliklerinde 10 damga toplayarak kazanır. Yani onu kulübün en aktif mühendislik öğrencileri giyer. İstediğiniz alanları seçin, sonra aşağıdan talebinizi bize gönderin.',
+    spotsTitle: 'Sponsor alanları', count: n => `Seçilen: ${n}`, available: 'Boş', taken: 'Dolu',
+    design: 'Tişört tasarımı', designs: { A: 'Mühür', B: 'Monogram', C: 'Teknik çizim', D: 'Mühendis defteri', E: 'Çıkartmalar', F: 'Formüller' },
+    front: 'Ön', back: 'Arka', spin: 'Döndür', drag: 'Tişörtü çevirmek için sürükleyin. Seçmek için bir alana dokunun.',
+    formTitle: 'Talebiniz', company: 'Firma', contact: 'İletişim (e-posta ya da telefon)', note: 'Not (isteğe bağlı)', prepare: 'Talebi hazırla',
+    errSpot: 'En az bir alan seçin.', errCompany: 'Firma adını yazın.',
+    outTitle: 'Gönderilecek mesaj', outHelp: 'Bu mesajı kopyalayıp şu adrese gönderin:', copy: 'Mesajı kopyala', copied: 'Kopyalandı', mail: 'E-posta uygulamasında aç',
+    fine: 'Bu sayfa kendi başına hiçbir şey göndermez. Ölçüler, yetişkin L beden tişörtteki baskı ölçüleridir.',
+    subject: 'IEC tişört sponsorluğu', hello: 'Merhaba IEC Engineering Club,', want: 'IEC tişörtüne sponsor olmak istiyoruz.',
+    lCompany: 'Firma', lSpots: 'Alanlar', lContact: 'İletişim', lNote: 'Not', lDesign: 'Baktığımız tasarım', thanks: 'Teşekkürler.',
+    spots: {
+      front: ['Ön göğüs, ana sponsor', 'En büyük alan, göğsün ortasında.'],
+      chest: ['Sağ göğüs', 'Kulüp logosunun karşısında küçük bir alan.'],
+      upper: ['Sırt üstü', 'Yakanın hemen altında.'],
+      lower: ['Sırt altı', 'Büyük sırt baskısının altında.'],
+      lsleeve: ['Sol kol', 'Sol kolun dış yüzü.'],
+      rsleeve: ['Sağ kol', 'Sağ kolun dış yüzü.'],
+    },
+  },
+  bs: {
+    club: 'Engineering Club, Sarajevo', stageTitle: 'IEC majica u 3D',
+    title: 'Stavite svoj logo na IEC majicu',
+    lede: 'Članovi IEC Engineering Cluba ovu majicu osvajaju skupljanjem 10 pečata na događajima kluba, pa je nose najaktivniji studenti inženjerstva u klubu. Odaberite mjesta koja želite, a zatim nam pošaljite zahtjev ispod.',
+    spotsTitle: 'Sponzorska mjesta', count: n => `Odabrano: ${n}`, available: 'Slobodno', taken: 'Zauzeto',
+    design: 'Dizajn majice', designs: { A: 'Pečat', B: 'Monogram', C: 'Tehnički crtež', D: 'Inženjerska bilježnica', E: 'Naljepnice', F: 'Formule' },
+    front: 'Naprijed', back: 'Leđa', spin: 'Okreći', drag: 'Povucite da okrenete majicu. Dodirnite mjesto da ga odaberete.',
+    formTitle: 'Vaš zahtjev', company: 'Firma', contact: 'Kontakt (e-mail ili telefon)', note: 'Napomena (nije obavezno)', prepare: 'Pripremi zahtjev',
+    errSpot: 'Odaberite barem jedno mjesto.', errCompany: 'Upišite naziv firme.',
+    outTitle: 'Poruka za slanje', outHelp: 'Kopirajte ovu poruku i pošaljite je na', copy: 'Kopiraj poruku', copied: 'Kopirano', mail: 'Otvori u e-mail aplikaciji',
+    fine: 'Ova stranica sama ništa ne šalje. Mjere su veličine printa na majici veličine L za odrasle.',
+    subject: 'Sponzorstvo IEC majice', hello: 'Pozdrav IEC Engineering Club,', want: 'Željeli bismo sponzorisati IEC majicu.',
+    lCompany: 'Firma', lSpots: 'Mjesta', lContact: 'Kontakt', lNote: 'Napomena', lDesign: 'Dizajn majice koji smo gledali', thanks: 'Hvala.',
+    spots: {
+      front: ['Prsa, glavni sponzor', 'Najveće mjesto, na sredini prsa.'],
+      chest: ['Desna strana prsa', 'Malo mjesto nasuprot logotipu kluba.'],
+      upper: ['Gornji dio leđa', 'Odmah ispod kragne.'],
+      lower: ['Donji dio leđa', 'Ispod velikog printa na leđima.'],
+      lsleeve: ['Lijevi rukav', 'Vanjska strana lijevog rukava.'],
+      rsleeve: ['Desni rukav', 'Vanjska strana desnog rukava.'],
+    },
+  },
+};
+
+// ---------- shirt outline, in inches: x to the viewer's right on the front, y down from the shoulder line
+const SA = 35 * Math.PI / 180, DIR = [Math.cos(SA), Math.sin(SA)], NRM = [-Math.sin(SA), Math.cos(SA)];
+const P = { N: [3.9, 0], S: [9.5, 1.7], A: [10.4, 9.6], H: [10.62, 28.5] };
+P.C1 = [P.S[0] + 8.5 * DIR[0], P.S[1] + 8.5 * DIR[1]];
+P.C2 = [P.C1[0] + 7.6 * NRM[0], P.C1[1] + 7.6 * NRM[1]];
+const Y0 = 14.2;
+const bez2 = (a, c, b, t) => [(1 - t) * (1 - t) * a[0] + 2 * (1 - t) * t * c[0] + t * t * b[0], (1 - t) * (1 - t) * a[1] + 2 * (1 - t) * t * c[1] + t * t * b[1]];
+const bez3 = (a, b, c, d, t) => { const u = 1 - t; return [u * u * u * a[0] + 3 * u * u * t * b[0] + 3 * u * t * t * c[0] + t * t * t * d[0], u * u * u * a[1] + 3 * u * u * t * b[1] + 3 * u * t * t * c[1] + t * t * t * d[1]]; };
+const mirror = pts => pts.map(p => [-p[0], p[1]]);
+function neckline(drop) {
+  const pts = [];
+  for (let i = 0; i <= 24; i++) pts.push(bez3([-3.9, 0], [-2.5, drop * 0.75], [-1.3, drop], [0, drop], i / 24));
+  for (let i = 1; i <= 24; i++) pts.push(bez3([0, drop], [1.3, drop], [2.5, drop * 0.75], [3.9, 0], i / 24));
+  return pts;
+}
+const UNDERARM = []; for (let i = 0; i <= 12; i++) UNDERARM.push(bez2(P.C2, [P.A[0] + 0.4, P.A[1] + 0.6], P.A, i / 12));
+const HEM = []; for (let i = 0; i <= 40; i++) HEM.push(bez2(P.H, [0, 28.74], [-P.H[0], P.H[1]], i / 40));
+const RIGHT = [P.N, P.S, P.C1, ...UNDERARM, P.H];
+function outline(drop) { return [...neckline(drop), ...RIGHT.slice(1), ...HEM.slice(1, -1), ...mirror(RIGHT).reverse().slice(0, -1)]; }
+const SEAMS = [];
+for (const poly of [[P.N, P.S], [P.S, P.C1], UNDERARM, [P.A, P.H]]) for (const pl of [poly, mirror(poly)]) for (let i = 0; i < pl.length - 1; i++) SEAMS.push([pl[i], pl[i + 1]]);
+function segDist(px, py, a, b) {
+  const vx = b[0] - a[0], vy = b[1] - a[1];
+  const t = Math.max(0, Math.min(1, ((px - a[0]) * vx + (py - a[1]) * vy) / (vx * vx + vy * vy)));
+  return Math.hypot(px - a[0] - t * vx, py - a[1] - t * vy);
+}
+function nearest(px, py, poly) {
+  let best = 1e9, bx = px, by = py;
+  for (let i = 0; i < poly.length; i++) {
+    const a = poly[i], b = poly[(i + 1) % poly.length], vx = b[0] - a[0], vy = b[1] - a[1];
+    const t = Math.max(0, Math.min(1, ((px - a[0]) * vx + (py - a[1]) * vy) / (vx * vx + vy * vy)));
+    const x = a[0] + t * vx, y = a[1] + t * vy, d = Math.hypot(px - x, py - y);
+    if (d < best) { best = d; bx = x; by = y; }
+  }
+  return [bx, by, best];
+}
+function inside(x, y, poly) {
+  let c = false;
+  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+    const [xi, yi] = poly[i], [xj, yj] = poly[j];
+    if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) c = !c;
+  }
+  return c;
+}
+const FOLDS = [[[10.2, 9.9], [6.4, 12.6]], [[-10.2, 9.9], [-6.4, 12.6]], [[9.9, 15], [7.2, 19]], [[-9.9, 15.5], [-7.4, 19.5]]];
+// Height of the cloth above the seam plane: rounded at the seams, open at the neck, cuffs and hem.
+function height(x, y, back) {
+  let ds = 1e9; for (const [a, b] of SEAMS) ds = Math.min(ds, segDist(x, y, a, b));
+  const d = Math.min(ds / 6.2, 1);
+  let z = 4.1 * Math.sqrt(Math.max(0, 1 - (1 - d) * (1 - d)));
+  z += d * (back ? 0.35 * Math.exp(-((x / 6.5) ** 2 + ((y - 7) / 5) ** 2)) : 0.5 * Math.exp(-((x / 7) ** 2 + ((y - 8.5) / 6) ** 2)));
+  for (const [a, b] of FOLDS) z -= d * 0.16 * Math.exp(-((segDist(x, y, a, b) / 0.55) ** 2));
+  z += d * 0.05 * Math.sin(x * 1.1 + y * 0.35) * Math.sin(y * 0.8 - x * 0.25);
+  return z;
+}
+
+// ---------- spots (inches, same coordinates; back spots are as seen from behind)
+const SLEEVE = 2.95;
+const SLEEVE_C = [P.S[0] + (P.C1[0] - P.S[0]) * 0.55 + NRM[0] * 3.8, P.S[1] + (P.C1[1] - P.S[1]) * 0.55 + NRM[1] * 3.8];
+const SPOTS = [
+  { id: 'front', side: 'front', rect: [-5, 9.0, 10, 3.2], cm: '25 × 8 cm', view: 0 },
+  { id: 'chest', side: 'front', rect: [-5.3, 5.2, 3.4, 1.4], cm: '8.5 × 3.5 cm', view: -0.25 },
+  { id: 'upper', side: 'back', rect: [-4, 2.2, 8, 1.8], cm: '20 × 4.5 cm', view: Math.PI },
+  { id: 'lower', side: 'back', rect: [-4.5, 17.0, 9, 2.2], cm: '23 × 5.5 cm', view: Math.PI },
+  { id: 'lsleeve', side: 'front', sleeve: 1, cm: '7.5 × 7.5 cm', view: 0.8 },
+  { id: 'rsleeve', side: 'front', sleeve: -1, cm: '7.5 × 7.5 cm', view: -0.8 },
+];
+// A-C are placed prints on a plain shirt; D-F cover the whole shirt (panels span x -17.5..17.5 in, y -0.5..29.5 in).
+const DESIGNS = {
+  A: { front: ['art/A_front.png', 1.9, 4.2, 3.4, 3.4], back: ['art/A_back.png', -5.5, 4.6, 11, 12], shirt: '#f7f7f5', rib: 0xe9ecf0, inner: 0xd9dee5 },
+  B: { front: ['art/B_front.png', 1.8, 4.1, 3.6, 3.6], back: ['art/B_back.png', -5.75, 6.1, 11.5, 9.5], shirt: '#f7f7f5', rib: 0xe9ecf0, inner: 0xd9dee5 },
+  C: { front: ['art/C_front.png', 1.7, 5.22, 3.8, 1.36], back: ['art/C_back.png', -6, 4.6, 12, 12], shirt: '#f7f7f5', rib: 0xe9ecf0, inner: 0xd9dee5 },
+  D: { panel: { front: 'panels/D_front.jpg', back: 'panels/D_back.jpg' }, shirt: '#ffffff', rib: 0xe6e9ee, inner: 0xd5dbe3 },
+  E: { panel: { front: 'panels/E_front.jpg', back: 'panels/E_back.jpg' }, shirt: '#d6e6f5', rib: 0xc3d6ea, inner: 0xaec4dc },
+  F: { panel: { front: 'panels/F_front.jpg', back: 'panels/F_back.jpg' }, shirt: '#0f2f52', rib: 0x0b2440, inner: 0x0a1d33 },
+};
+const ORDER = ['D', 'E', 'F', 'A', 'B', 'C'];
+
+// ---------- state
+const state = { lang: 'en', design: 'D', selected: new Set(), hover: null };
+try {
+  const saved = localStorage.getItem('iec-sponsor-lang');
+  state.lang = T[saved] ? saved : (/^tr/i.test(navigator.language) ? 'tr' : /^(bs|hr|sr)/i.test(navigator.language) ? 'bs' : 'en');
+} catch { state.lang = /^tr/i.test(navigator.language) ? 'tr' : 'en'; }
+const tx = () => T[state.lang];
+const $ = id => document.getElementById(id);
+
+// ---------- panel
+function renderText() {
+  document.documentElement.lang = state.lang;
+  for (const el of document.querySelectorAll('[data-t]')) { const v = tx()[el.dataset.t]; if (typeof v === 'string') el.textContent = v; }
+  for (const b of document.querySelectorAll('#langs button')) b.setAttribute('aria-pressed', String(b.dataset.lang === state.lang));
+  $('designs').setAttribute('aria-label', tx().design);
+  $('views').setAttribute('aria-label', tx().stageTitle);
+  $('gl').setAttribute('aria-label', tx().stageTitle);
+  $('fallback').alt = tx().stageTitle;
+  $('addr').textContent = EMAIL;
+  renderDesigns(); renderSpots();
+  if (!$('out').hidden) buildMessage();
+}
+function renderDesigns() {
+  const box = $('designs'); box.textContent = '';
+  for (const k of ORDER) {
+    const b = document.createElement('button');
+    b.type = 'button'; b.textContent = `${k} · ${tx().designs[k]}`;
+    b.setAttribute('aria-pressed', String(state.design === k));
+    b.addEventListener('click', () => setDesign(k));
+    box.appendChild(b);
+  }
+}
+function renderSpots() {
+  const ul = $('spots'); ul.textContent = '';
+  for (const s of SPOTS) {
+    const taken = TAKEN.includes(s.id);
+    const li = document.createElement('li');
+    li.className = 'spot' + (taken ? ' taken' : '') + (state.hover === s.id ? ' hot' : '');
+    const input = document.createElement('input');
+    input.type = 'checkbox'; input.id = 'spot-' + s.id; input.checked = state.selected.has(s.id); input.disabled = taken;
+    input.addEventListener('change', () => { toggle(s.id, input.checked); focusSpot(s); });
+    const label = document.createElement('label'); label.htmlFor = input.id;
+    label.addEventListener('mouseenter', () => setHover(s.id)); label.addEventListener('mouseleave', () => setHover(null));
+    const [name, desc] = tx().spots[s.id];
+    label.innerHTML = '<span class="box" aria-hidden="true"></span><span class="spot-name"></span><span class="spot-size"></span><span class="spot-desc"></span><span class="chip"></span>';
+    label.querySelector('.spot-name').textContent = name;
+    label.querySelector('.spot-size').textContent = s.cm;
+    label.querySelector('.spot-desc').textContent = desc;
+    label.querySelector('.chip').textContent = taken ? tx().taken : tx().available;
+    li.append(input, label); ul.appendChild(li);
+  }
+  $('count').textContent = tx().count(state.selected.size);
+}
+function toggle(id, on) {
+  if (TAKEN.includes(id)) return;
+  if (on === undefined) on = !state.selected.has(id);
+  if (on) state.selected.add(id); else state.selected.delete(id);
+  renderSpots(); paintAll();
+  if (!$('out').hidden) buildMessage();
+}
+function setHover(id) {
+  if (state.hover === id) return;
+  state.hover = id;
+  for (const li of document.querySelectorAll('.spot')) li.classList.toggle('hot', li.querySelector('input').id === 'spot-' + id);
+  paintAll();
+}
+function buildMessage() {
+  const t = tx(), spots = SPOTS.filter(s => state.selected.has(s.id)).map(s => `- ${t.spots[s.id][0]} (${s.cm})`);
+  const lines = [t.hello, '', t.want, '', `${t.lCompany}: ${$('company').value.trim()}`, `${t.lSpots}:`, ...spots];
+  if ($('contact').value.trim()) lines.push(`${t.lContact}: ${$('contact').value.trim()}`);
+  if ($('note').value.trim()) lines.push(`${t.lNote}: ${$('note').value.trim()}`);
+  lines.push(`${t.lDesign}: ${state.design} · ${t.designs[state.design]}`, '', t.thanks);
+  const text = lines.join('\n');
+  $('msg').value = text;
+  $('mail').href = `mailto:${EMAIL}?subject=${encodeURIComponent(t.subject)}&body=${encodeURIComponent(text)}`;
+}
+$('req').addEventListener('submit', e => {
+  e.preventDefault();
+  const err = !state.selected.size ? tx().errSpot : !$('company').value.trim() ? tx().errCompany : '';
+  $('err').hidden = !err; $('err').textContent = err;
+  if (err) { (state.selected.size ? $('company') : $('spot-' + SPOTS[0].id)).focus(); return; }
+  buildMessage(); $('out').hidden = false; $('msg').focus();
+});
+$('copy').addEventListener('click', async () => {
+  const done = () => { $('copy').textContent = tx().copied; setTimeout(() => { $('copy').textContent = tx().copy; }, 1800); };
+  try { await navigator.clipboard.writeText($('msg').value); done(); }
+  catch { $('msg').select(); }
+});
+for (const b of document.querySelectorAll('#langs button')) b.addEventListener('click', () => {
+  state.lang = b.dataset.lang;
+  try { localStorage.setItem('iec-sponsor-lang', state.lang); } catch { /* storage may be blocked */ }
+  renderText(); paintAll();
+});
+
+// ---------- textures
+const PPI = (Math.min(innerWidth, innerHeight) < 700 ? 48 : 72), TW = Math.round(35 * PPI), TH = Math.round(30 * PPI);
+const canvases = { front: document.createElement('canvas'), back: document.createElement('canvas') };
+for (const c of Object.values(canvases)) { c.width = TW; c.height = TH; }
+const images = {}, loading = {};
+function loadImage(src) {
+  if (!loading[src]) loading[src] = new Promise(res => { const im = new Image(); im.onload = () => { images[src] = im; res(); }; im.onerror = res; im.src = src; });
+  return loading[src];
+}
+function ensureDesign(k) {
+  const d = DESIGNS[k];
+  return Promise.all(d.panel ? [loadImage(d.panel.front), loadImage(d.panel.back)] : [loadImage(d.front[0]), loadImage(d.back[0])]);
+}
+const mats = { rims: [], inner: [] };
+function setDesign(k) {
+  state.design = k; renderDesigns();
+  $('fallback').src = `mock/${k}.jpg`;
+  for (const m of mats.rims) m.color.setHex(DESIGNS[k].rib);
+  for (const m of mats.inner) m.color.setHex(DESIGNS[k].inner);
+  paintAll();
+  ensureDesign(k).then(() => { if (state.design === k) paintAll(); });
+}
+function roundRect(g, x, y, w, h, r) { g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); }
+function spotFrame(g, s) {
+  if (s.sleeve) {
+    const cx = SLEEVE_C[0] * s.sleeve, cy = SLEEVE_C[1];
+    g.translate(cx, cy); g.rotate(s.sleeve * SA); g.translate(-SLEEVE / 2, -SLEEVE / 2);
+    return [SLEEVE, SLEEVE];
+  }
+  g.translate(s.rect[0], s.rect[1]); return [s.rect[2], s.rect[3]];
+}
+function drawSpot(g, s) {
+  const taken = TAKEN.includes(s.id), sel = state.selected.has(s.id), hot = state.hover === s.id;
+  g.save();
+  const [w, h] = spotFrame(g, s);
+  roundRect(g, 0, 0, w, h, 0.09);
+  g.fillStyle = taken ? '#d9dde3' : sel ? '#154a7f' : hot ? '#dbe8f6' : 'rgba(233,241,250,0.93)';
+  g.fill();
+  g.lineWidth = sel || hot ? 0.08 : 0.055;
+  g.setLineDash(sel || hot || taken ? [] : [0.24, 0.13]);
+  g.strokeStyle = hot && !sel ? '#d9a92a' : taken ? '#9aa5b1' : '#154a7f';
+  g.stroke();
+  g.setLineDash([]);
+  g.scale(1 / PPI, 1 / PPI);
+  const W = w * PPI, H = h * PPI, word = taken ? tx().taken.toUpperCase() : 'SPONSOR';
+  let fs = Math.min(H * 0.34, W * 0.13);
+  g.font = `700 ${fs}px "Space Grotesk"`; g.letterSpacing = `${fs * 0.16}px`;
+  const tw = g.measureText(word).width;
+  if (tw > W * 0.8) { fs *= (W * 0.8) / tw; g.font = `700 ${fs}px "Space Grotesk"`; g.letterSpacing = `${fs * 0.16}px`; }
+  const ms = Math.max(9, Math.min(H * 0.12, fs * 0.42));
+  g.fillStyle = sel ? '#ffffff' : taken ? '#6b7682' : '#154a7f';
+  g.textAlign = 'center'; g.textBaseline = 'alphabetic';
+  const gap = H * 0.08, block = fs * 0.72 + gap + ms * 0.72, top = (H - block) / 2;
+  g.fillText(word, W / 2 + fs * 0.08, top + fs * 0.72);
+  g.font = `600 ${ms}px "JetBrains Mono"`; g.letterSpacing = '0px';
+  g.fillText(sel ? '✓ ' + s.cm : s.cm, W / 2, top + fs * 0.72 + gap + ms * 0.72);
+  g.restore();
+}
+const textures = {};
+function paint(side) {
+  const g = canvases[side].getContext('2d');
+  const d = DESIGNS[state.design];
+  g.setTransform(1, 0, 0, 1, 0, 0);
+  g.fillStyle = d.shirt; g.fillRect(0, 0, TW, TH);
+  g.setTransform(PPI, 0, 0, PPI, 17.5 * PPI, 0.5 * PPI);
+  g.imageSmoothingQuality = 'high';
+  if (d.panel) { const im = images[d.panel[side]]; if (im) g.drawImage(im, -17.5, -0.5, 35, 30); }
+  else { const [src, x, y, w, h] = d[side]; if (images[src]) g.drawImage(images[src], x, y, w, h); }
+  for (const s of SPOTS) if (s.side === side) drawSpot(g, s);
+  if (textures[side]) textures[side].needsUpdate = true;
+}
+function paintAll() { paint('front'); paint('back'); }
+
+// ---------- 3D
+const canvas = $('gl');
+let renderer, scene, camera, controls, meshes = [], anim = null;
+function buildPanel(back) {
+  const poly = outline(back ? 0.9 : 3.3);
+  const h = 0.2, x0 = -17.4, y0 = -0.4, nx = 174, ny = 147;
+  const used = new Int32Array((nx + 1) * (ny + 1)).fill(-1), tris = [];
+  const vx = k => x0 + (k % (nx + 1)) * h, vy = k => y0 + Math.floor(k / (nx + 1)) * h;
+  for (let j = 0; j < ny; j++) for (let i = 0; i < nx; i++) {
+    const a = j * (nx + 1) + i, b = a + 1, c = a + nx + 1, d = c + 1;
+    for (const t of [[a, c, b], [b, c, d]]) {
+      if (inside((vx(t[0]) + vx(t[1]) + vx(t[2])) / 3, (vy(t[0]) + vy(t[1]) + vy(t[2])) / 3, poly)) { tris.push(t); for (const k of t) used[k] = 0; }
+    }
+  }
+  const pos = [], nor = [], uv = [], index = [];
+  let n = 0;
+  const e = 0.05, sign = back ? -1 : 1;
+  for (let k = 0; k < used.length; k++) {
+    if (used[k] < 0) continue;
+    let x = vx(k), y = vy(k);
+    const [nxp, nyp, dist] = nearest(x, y, poly);
+    if (!inside(x, y, poly) || dist < h * 0.35) { x = nxp; y = nyp; }
+    const z = height(x, y, back);
+    const zx = (height(x + e, y, back) - height(x - e, y, back)) / (2 * e);
+    const zy = (height(x, y + e, back) - height(x, y - e, back)) / (2 * e);
+    const nv = new THREE.Vector3(-zx, zy, sign).normalize();
+    pos.push(x, Y0 - y, z * sign); nor.push(nv.x, nv.y, nv.z);
+    uv.push(back ? (17.5 - x) / 35 : (x + 17.5) / 35, 1 - (y + 0.5) / 30);
+    used[k] = n++;
+  }
+  for (const t of tris) { const [a, b, c] = t.map(k => used[k]); if (back) index.push(a, c, b); else index.push(a, b, c); }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  geo.setAttribute('normal', new THREE.Float32BufferAttribute(nor, 3));
+  geo.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
+  geo.setIndex(index);
+  return geo;
+}
+function rim(frontPts, backPts, radius, color) {
+  const pts = [...frontPts.map(([x, y]) => new THREE.Vector3(x, Y0 - y, height(x, y, false))), ...backPts.map(([x, y]) => new THREE.Vector3(x, Y0 - y, -height(x, y, true)))];
+  const geo = new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts, true, 'centripetal'), Math.max(60, pts.length * 3), radius, 10, true);
+  const mat = new THREE.MeshStandardMaterial({ color, roughness: 0.95 });
+  mats.rims.push(mat);
+  return new THREE.Mesh(geo, mat);
+}
+function fabricNormalMap() {
+  const c = document.createElement('canvas'); c.width = c.height = 256;
+  const g = c.getContext('2d'), img = g.createImageData(256, 256);
+  for (let y = 0; y < 256; y++) for (let x = 0; x < 256; x++) {
+    const rib = Math.sin(x * Math.PI / 2) * 0.5 + (Math.random() - 0.5) * 0.6;
+    const i = (y * 256 + x) * 4;
+    img.data[i] = 128 + rib * 26; img.data[i + 1] = 128 + (Math.random() - 0.5) * 20; img.data[i + 2] = 255; img.data[i + 3] = 255;
+  }
+  g.putImageData(img, 0, 0);
+  const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(70, 60);
+  return t;
+}
+function init3d() {
+  renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  scene = new THREE.Scene();
+  camera = new THREE.PerspectiveCamera(28, 1, 1, 600);
+  scene.add(new THREE.HemisphereLight(0xffffff, 0xc4ceda, 1.9));
+  const key = new THREE.DirectionalLight(0xffffff, 1.45); key.position.set(-30, 40, 55); scene.add(key);
+  const rimL = new THREE.DirectionalLight(0xdfe9ff, 0.7); rimL.position.set(40, 10, -50); scene.add(rimL);
+  const fnm = fabricNormalMap();
+  for (const side of ['front', 'back']) {
+    const tex = new THREE.CanvasTexture(canvases[side]);
+    tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+    textures[side] = tex;
+    const geo = buildPanel(side === 'back');
+    const outer = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ map: tex, roughness: 0.93, normalMap: fnm, normalScale: new THREE.Vector2(0.18, 0.18), side: THREE.FrontSide }));
+    outer.userData.side = side; meshes.push(outer); scene.add(outer);
+    const innerMat = new THREE.MeshStandardMaterial({ color: DESIGNS[state.design].inner, roughness: 1, side: THREE.BackSide });
+    mats.inner.push(innerMat);
+    scene.add(new THREE.Mesh(geo, innerMat));
+  }
+  const rib = DESIGNS[state.design].rib;
+  scene.add(rim(neckline(3.3), neckline(0.9).reverse().slice(1, -1), 0.3, rib));
+  scene.add(rim(HEM, [...HEM].reverse().slice(1, -1), 0.11, rib));
+  const cuff = sg => { const a = [P.C1[0] * sg, P.C1[1]], b = [P.C2[0] * sg, P.C2[1]], line = []; for (let i = 0; i <= 16; i++) line.push([a[0] + (b[0] - a[0]) * i / 16, a[1] + (b[1] - a[1]) * i / 16]); return rim(line, [...line].reverse().slice(1, -1), 0.11, rib); };
+  scene.add(cuff(1), cuff(-1));
+  // soft floor shadow
+  const sc = document.createElement('canvas'); sc.width = sc.height = 128;
+  const sg = sc.getContext('2d'), grd = sg.createRadialGradient(64, 64, 4, 64, 64, 64);
+  grd.addColorStop(0, 'rgba(15,47,82,0.28)'); grd.addColorStop(1, 'rgba(15,47,82,0)');
+  sg.fillStyle = grd; sg.fillRect(0, 0, 128, 128);
+  const shadow = new THREE.Mesh(new THREE.PlaneGeometry(34, 12), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(sc), transparent: true, depthWrite: false }));
+  shadow.rotation.x = -Math.PI / 2; shadow.position.y = Y0 - 31; scene.add(shadow);
+
+  controls = new OrbitControls(camera, canvas);
+  controls.target.set(0, Y0 - 13.5, 0);
+  controls.enablePan = false; controls.enableDamping = true; controls.dampingFactor = 0.08;
+  controls.minPolarAngle = 1.05; controls.maxPolarAngle = 2.0;
+  controls.autoRotate = !reduceMotion; controls.autoRotateSpeed = 1.1;
+  controls.addEventListener('start', () => { controls.autoRotate = false; anim = null; pressView(null); });
+  camera.position.set(0, Y0 - 11, 80);
+  resize();
+  new ResizeObserver(resize).observe(canvas);
+  setupPicking();
+  renderer.setAnimationLoop(tick);
+}
+function fitDistance() {
+  const aspect = canvas.clientWidth / Math.max(1, canvas.clientHeight), t = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
+  return Math.max(18 / t, 19.5 / (t * aspect)) + 6;
+}
+function resize() {
+  const w = canvas.clientWidth, h = canvas.clientHeight; if (!w || !h) return;
+  renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix();
+  const dist = fitDistance();
+  controls.minDistance = dist * 0.45; controls.maxDistance = dist * 1.4;
+  const off = camera.position.clone().sub(controls.target); off.setLength(dist); camera.position.copy(controls.target).add(off);
+}
+function viewTo(theta) {
+  const off = camera.position.clone().sub(controls.target), sph = new THREE.Spherical().setFromVector3(off);
+  const dd = ((theta - sph.theta + Math.PI) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI) - Math.PI;
+  controls.autoRotate = false;
+  anim = { t0: performance.now(), from: sph.theta, dd, phi0: sph.phi, phi1: Math.PI / 2 - 0.06, r0: sph.radius, r1: fitDistance(), dur: reduceMotion ? 1 : 750 };
+}
+function tick(now) {
+  if (anim) {
+    const k = Math.min(1, (now - anim.t0) / anim.dur), e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+    const sph = new THREE.Spherical(anim.r0 + (anim.r1 - anim.r0) * e, anim.phi0 + (anim.phi1 - anim.phi0) * e, anim.from + anim.dd * e);
+    camera.position.copy(controls.target).add(new THREE.Vector3().setFromSpherical(sph));
+    if (k >= 1) anim = null;
+  }
+  controls.update();
+  renderer.render(scene, camera);
+}
+function focusSpot(s) { if (!controls) return; viewTo(s.view); pressView(null); }
+function pressView(v) { for (const b of document.querySelectorAll('#views .view')) b.setAttribute('aria-pressed', String(b.dataset.view === v)); }
+for (const b of document.querySelectorAll('#views .view')) b.addEventListener('click', () => {
+  const v = b.dataset.view;
+  if (!controls) return;
+  if (v === 'spin') { anim = null; controls.autoRotate = !controls.autoRotate; pressView(controls.autoRotate ? 'spin' : null); return; }
+  viewTo(v === 'front' ? 0 : Math.PI); pressView(v);
+});
+function spotAt(side, x, y) {
+  for (const s of SPOTS) {
+    if (s.side !== side) continue;
+    if (s.sleeve) {
+      const dx = x - SLEEVE_C[0] * s.sleeve, dy = y - SLEEVE_C[1], a = s.sleeve * SA;
+      const lx = dx * Math.cos(a) + dy * Math.sin(a), ly = -dx * Math.sin(a) + dy * Math.cos(a);
+      if (Math.abs(lx) <= SLEEVE / 2 && Math.abs(ly) <= SLEEVE / 2) return s;
+    } else {
+      const [rx, ry, rw, rh] = s.rect;
+      if (x >= rx && x <= rx + rw && y >= ry && y <= ry + rh) return s;
+    }
+  }
+  return null;
+}
+function setupPicking() {
+  const ray = new THREE.Raycaster(), ndc = new THREE.Vector2();
+  let down = null;
+  const pick = ev => {
+    const r = canvas.getBoundingClientRect();
+    ndc.set(((ev.clientX - r.left) / r.width) * 2 - 1, -((ev.clientY - r.top) / r.height) * 2 + 1);
+    ray.setFromCamera(ndc, camera);
+    const hit = ray.intersectObjects(meshes, false)[0];
+    if (!hit) return null;
+    const side = hit.object.userData.side, x = side === 'back' ? -hit.point.x : hit.point.x, y = Y0 - hit.point.y;
+    return spotAt(side, x, y);
+  };
+  canvas.addEventListener('pointerdown', ev => { down = [ev.clientX, ev.clientY]; });
+  canvas.addEventListener('pointerup', ev => {
+    if (!down || Math.hypot(ev.clientX - down[0], ev.clientY - down[1]) > 6) { down = null; return; }
+    down = null;
+    const s = pick(ev);
+    if (s) { toggle(s.id); controls.autoRotate = false; pressView(null); }
+  });
+  canvas.addEventListener('pointermove', ev => {
+    if (ev.pointerType !== 'mouse' || ev.buttons) return;
+    const s = pick(ev);
+    canvas.classList.toggle('pointing', !!s);
+    setHover(s ? s.id : null);
+  });
+  canvas.addEventListener('pointerleave', () => { canvas.classList.remove('pointing'); setHover(null); });
+}
+
+// ---------- start
+renderText();
+$('fallback').src = `mock/${state.design}.jpg`;
+const fontsReady = Promise.all([document.fonts.load('700 40px "Space Grotesk"'), document.fonts.load('600 20px "JetBrains Mono"')]).catch(() => {});
+document.fonts.addEventListener('loadingdone', () => paintAll());
+Promise.all([ensureDesign(state.design), fontsReady]).then(() => {
+  paintAll();
+  try { init3d(); }
+  catch (err) { canvas.hidden = true; $('fallback').hidden = false; $('views').hidden = true; }
+});
+</script>
+
+</body>
+</html>
